@@ -1,0 +1,48 @@
+import type { Product } from '../models/product';
+
+export const MOCK_PRODUCTS: Product[] = [
+  {
+    id: 'prod-chatgpt-plus',
+    name: 'ChatGPT Plus (Chính chủ)',
+    description: 'Tài khoản ChatGPT Plus sử dụng GPT-4o, DALL-E 3 không giới hạn tốc độ và ưu tiên truy cập.',
+    price: 450000,
+    originalPrice: 550000,
+    status: 'online',
+    category: 'chatgpt',
+    imageUrl: 'https://images.unsplash.com/photo-1677442136019-21780efad99a?auto=format&fit=crop&w=400&q=80',
+    isPopular: true,
+  },
+  {
+    id: 'prod-claude-pro',
+    name: 'Claude Pro (Claude 3.5 Sonnet)',
+    description: 'Truy cập mô hình Claude 3.5 Sonnet và Opus mạnh mẽ nhất của Anthropic, dung lượng context lớn.',
+    price: 470000,
+    originalPrice: 560000,
+    status: 'online',
+    category: 'claude',
+    imageUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400&q=80',
+    isPopular: true,
+  },
+  {
+    id: 'prod-midjourney-basic',
+    name: 'Midjourney Standard Plan',
+    description: 'Tạo ảnh nghệ thuật AI đỉnh cao, chế độ Relax mode không giới hạn và 15h Fast GPU time/tháng.',
+    price: 650000,
+    originalPrice: 750000,
+    status: 'online',
+    category: 'midjourney',
+    imageUrl: 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&w=400&q=80',
+    isPopular: false,
+  },
+  {
+    id: 'prod-github-copilot',
+    name: 'GitHub Copilot 1 Năm',
+    description: 'Trợ lý lập trình AI hỗ trợ đa ngôn ngữ, tự động hoàn thiện code và giải thích cú pháp chuyên sâu.',
+    price: 590000,
+    originalPrice: 1200000,
+    status: 'online',
+    category: 'copilot',
+    imageUrl: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=400&q=80',
+    isPopular: true,
+  },
+];
