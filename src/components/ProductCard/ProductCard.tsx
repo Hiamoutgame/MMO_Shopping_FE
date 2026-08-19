@@ -2,6 +2,7 @@ import React from 'react';
 import type { Product } from '../../common/models/product';
 import { formatCurrency } from '../../common/libs/formatter';
 import { cn } from '../../common/libs/cn';
+import { Link } from 'react-router-dom';
 import { Button } from '../Button/Button';
 import { Chip } from '../Chip/Chip';
 
@@ -27,7 +28,7 @@ export function ProductCard({
       {...props}
     >
       {/* Product Image & Badges */}
-      <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-black/40 mb-4">
+      <Link to={`/products/${product.id}`} className="block relative aspect-video w-full overflow-hidden rounded-xl bg-black/40 mb-4 cursor-pointer">
         {product.imageUrl ? (
           <img
             src={product.imageUrl}
@@ -44,16 +45,16 @@ export function ProductCard({
             {product.status === 'online' ? 'Sẵn sàng' : 'Hết hàng'}
           </Chip>
         </div>
-      </div>
+      </Link>
 
       {/* Product Info */}
       <div className="flex-1 flex flex-col">
-        <h3
-          onClick={() => onViewDetail?.(product)}
+        <Link
+          to={`/products/${product.id}`}
           className="text-lg font-bold text-[#F8FAFC] tracking-tight hover:text-[#0EA5FF] cursor-pointer transition-colors line-clamp-1"
         >
           {product.name}
-        </h3>
+        </Link>
         <p className="mt-2 text-sm text-[#94A3B8] line-clamp-2 leading-relaxed">
           {product.description}
         </p>

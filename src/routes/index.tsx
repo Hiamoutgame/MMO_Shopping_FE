@@ -1,8 +1,9 @@
 import { Suspense } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { APP_CONSTANTS } from '../common/const/app';
 import { MainLayout, AuthLayout } from '../layouts';
 import {
+  HomePage,
   ProductsPage,
   ProductDetailPage,
   CartPage,
@@ -31,7 +32,7 @@ export function AppRouter() {
       <Suspense fallback={<LoadingFallback />}>
         <Routes>
           {/* Main Layout Routes */}
-          <Route path={APP_CONSTANTS.ROUTES.HOME} element={<Navigate to={APP_CONSTANTS.ROUTES.PRODUCTS} replace />} />
+          <Route path={APP_CONSTANTS.ROUTES.HOME} element={<MainLayout pageTitle="TRANG CHỦ"><HomePage /></MainLayout>} />
           <Route path={APP_CONSTANTS.ROUTES.PRODUCTS} element={<MainLayout pageTitle="SẢN PHẨM"><ProductsPage /></MainLayout>} />
           <Route path={APP_CONSTANTS.ROUTES.PRODUCT_DETAIL} element={<MainLayout pageTitle="CHI TIẾT"><ProductDetailPage /></MainLayout>} />
           <Route path={APP_CONSTANTS.ROUTES.CART} element={<MainLayout pageTitle="GIỎ HÀNG"><CartPage /></MainLayout>} />
