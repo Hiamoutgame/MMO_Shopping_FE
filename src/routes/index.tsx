@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { APP_CONSTANTS } from '../common/const/app';
+import { MainLayout, AuthLayout } from '../layouts';
 import {
   ProductsPage,
   ProductDetailPage,
@@ -15,31 +16,10 @@ import {
 
 function LoadingFallback() {
   return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: '100vh',
-        backgroundColor: '#07080D',
-        color: '#94A3B8',
-        fontFamily: 'Inter, sans-serif',
-      }}
-    >
-      <div style={{ textAlign: 'center' }}>
-        <div
-          style={{
-            width: 36,
-            height: 36,
-            border: '3px solid #162033CC',
-            borderTopColor: '#0EA5FF',
-            borderRadius: '50%',
-            animation: 'spin 1s linear infinite',
-            margin: '0 auto 12px auto',
-          }}
-        />
-        <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
-        <p>Đang tải dữ liệu...</p>
+    <div className="flex items-center justify-center min-h-screen bg-[#07080D] text-[#94A3B8] font-sans">
+      <div className="text-center">
+        <div className="w-9 h-9 border-4 border-[#162033CC] border-t-[#0EA5FF] rounded-full animate-spin mx-auto mb-3" />
+        <p className="text-sm font-medium">Đang tải dữ liệu...</p>
       </div>
     </div>
   );
@@ -50,16 +30,21 @@ export function AppRouter() {
     <BrowserRouter>
       <Suspense fallback={<LoadingFallback />}>
         <Routes>
+          {/* Main Layout Routes */}
           <Route path={APP_CONSTANTS.ROUTES.HOME} element={<Navigate to={APP_CONSTANTS.ROUTES.PRODUCTS} replace />} />
-          <Route path={APP_CONSTANTS.ROUTES.PRODUCTS} element={<ProductsPage />} />
-          <Route path={APP_CONSTANTS.ROUTES.PRODUCT_DETAIL} element={<ProductDetailPage />} />
-          <Route path={APP_CONSTANTS.ROUTES.CART} element={<CartPage />} />
-          <Route path={APP_CONSTANTS.ROUTES.SUPPORT} element={<SupportPage />} />
-          <Route path={APP_CONSTANTS.ROUTES.POLICY} element={<PolicyPage />} />
-          <Route path={APP_CONSTANTS.ROUTES.CONTACT} element={<ContactPage />} />
-          <Route path={APP_CONSTANTS.ROUTES.LOGIN} element={<LoginPage />} />
-          <Route path={APP_CONSTANTS.ROUTES.REGISTER} element={<RegisterPage />} />
-          <Route path="*" element={<NotFoundPage />} />
+          <Route path={APP_CONSTANTS.ROUTES.PRODUCTS} element={<MainLayout pageTitle="SẢN PHẨM"><ProductsPage /></MainLayout>} />
+          <Route path={APP_CONSTANTS.ROUTES.PRODUCT_DETAIL} element={<MainLayout pageTitle="CHI TIẾT"><ProductDetailPage /></MainLayout>} />
+          <Route path={APP_CONSTANTS.ROUTES.CART} element={<MainLayout pageTitle="GIỎ HÀNG"><CartPage /></MainLayout>} />
+          <Route path={APP_CONSTANTS.ROUTES.SUPPORT} element={<MainLayout pageTitle="TIẾP SỨC"><SupportPage /></MainLayout>} />
+          <Route path={APP_CONSTANTS.ROUTES.POLICY} element={<MainLayout pageTitle="CHÍNH SÁCH"><PolicyPage /></MainLayout>} />
+          <Route path={APP_CONSTANTS.ROUTES.CONTACT} element={<MainLayout pageTitle="LIÊN HỆ"><ContactPage /></MainLayout>} />
+          
+          {/* Auth Layout Routes */}
+          <Route path={APP_CONSTANTS.ROUTES.LOGIN} element={<AuthLayout><LoginPage /></AuthLayout>} />
+          <Route path={APP_CONSTANTS.ROUTES.REGISTER} element={<AuthLayout><RegisterPage /></AuthLayout>} />
+          
+          {/* Fallback */}
+          <Route path="*" element={<MainLayout pageTitle="404"><NotFoundPage /></MainLayout>} />
         </Routes>
       </Suspense>
     </BrowserRouter>
