@@ -11,7 +11,7 @@ export default function PolicyPage() {
 
       {/* 4. Body Layout - Main Policy Panel */}
       <div className="w-full rounded-[24px] bg-[#0C101CEE] border border-[#7887BE33] p-6 sm:p-8 lg:p-9 backdrop-blur-[18px] shadow-[0_18px_38px_#00000066] flex flex-col gap-6">
-        
+
         {/* 5. Opening block */}
         <div className="flex flex-col gap-3">
           <span className="font-mono text-[11px] font-extrabold tracking-[1.1px] uppercase text-[#35FFB1]">

@@ -18,7 +18,7 @@ export function Header() {
 
   return (
     <header className="w-full flex justify-center py-6 bg-[#07080D] sticky top-0 z-50">
-      <div className="w-[1200px] h-16 bg-[#0B1020CC] backdrop-blur-[18px] rounded-[32px] border border-white/10 shadow-[0_14px_30px_rgba(0,0,0,0.5)] flex items-center justify-between px-4">
+      <div className="w-[calc(100%-2rem)] max-w-[1200px] min-h-16 bg-[#0B1020CC] backdrop-blur-[18px] rounded-[32px] border border-white/10 shadow-[0_14px_30px_rgba(0,0,0,0.5)] flex items-center justify-between gap-4 px-4 sm:px-5">
 
         {/* Left: Brand */}
         <Link to={APP_CONSTANTS.ROUTES.HOME} className="flex items-center gap-3 shrink-0 group">
@@ -27,7 +27,7 @@ export function Header() {
         </Link>
 
         {/* Center: Nav */}
-        <nav className="flex items-center gap-2">
+        <nav className="hidden lg:flex items-center gap-1">
           {navLinks.map((link) => (
             <NavLink
               key={link.path}
@@ -48,8 +48,7 @@ export function Header() {
 
         {/* Right: Actions */}
         <div className="flex items-center gap-3 shrink-0">
-          <Link to={APP_CONSTANTS.ROUTES.CART}>
-            <button aria-label="Cart" className="relative flex items-center justify-center w-[42px] h-[42px] bg-[#0C101CEE] border border-white/10 rounded-[14px] hover:bg-white/5 transition-colors">
+          <Link aria-label="Giỏ hàng" to={APP_CONSTANTS.ROUTES.CART} className="relative flex items-center justify-center w-[42px] h-[42px] bg-[#0C101CEE] border border-white/10 rounded-[14px] hover:bg-white/5 transition-colors">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#DCE4F8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="8" cy="21" r="1" />
                 <circle cx="19" cy="21" r="1" />
@@ -60,14 +59,13 @@ export function Header() {
                   {totalItems}
                 </span>
               )}
-            </button>
           </Link>
-          <Link to={APP_CONSTANTS.ROUTES.LOGIN}>
+          <Link className="hidden sm:block" to={APP_CONSTANTS.ROUTES.LOGIN}>
             <Button variant="secondary" className="h-[42px] px-4 rounded-[14px]">
               Đăng nhập
             </Button>
           </Link>
-          <Link to={APP_CONSTANTS.ROUTES.REGISTER}>
+          <Link className="hidden sm:block" to={APP_CONSTANTS.ROUTES.REGISTER}>
             <Button variant="primary" className="h-[42px] px-4 rounded-[14px]">
               Đăng ký
             </Button>

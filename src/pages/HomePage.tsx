@@ -13,7 +13,7 @@ export default function HomePage() {
         <div className="absolute w-[620px] h-[320px] bg-[#008CFF] rounded-full blur-[54px] opacity-32 pointer-events-none top-0 left-[40%]" />
         <div className="absolute w-[520px] h-[520px] bg-[#7B2CFF] rounded-full blur-[62px] opacity-36 pointer-events-none top-[110px] left-[60%]" />
         <div className="absolute w-[520px] h-[240px] bg-[#00D5FF] rounded-full blur-[48px] opacity-18 pointer-events-none top-[520px] left-[120px]" />
-        
+
         {/* Signal streaks */}
         <div className="absolute w-[420px] h-[4px] bg-[#6A35FF99] blur-[36px] rounded-[4px] -rotate-8 top-[80px] left-[55%] pointer-events-none" />
         <div className="absolute w-[520px] h-[4px] bg-[#008CFF66] blur-[36px] rounded-[4px] rotate-7 top-[620px] left-[150px] pointer-events-none" />
@@ -127,7 +127,7 @@ export default function HomePage() {
       {/* 8. DARK SAAS SECTIONS SLOT (Padding: 96px 112px, Gap: 80px)               */}
       {/* ========================================================================= */}
       <div className="w-full px-6 lg:px-[112px] py-[80px] flex flex-col gap-[80px] items-center relative">
-        
+
         {/* Ambient Wash Decorations */}
         <div className="absolute w-[520px] h-[360px] bg-[#6D5DF211] rounded-full blur-[70px] pointer-events-none top-[60px] right-10" />
         <div className="absolute w-[520px] h-[420px] bg-[#21B7FF0E] rounded-full blur-[80px] pointer-events-none top-[520px] left-0" />

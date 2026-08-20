@@ -19,6 +19,12 @@ export function ProductCard({
   className,
   ...props
 }: ProductCardProps) {
+  const handleViewDetail = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    if (!onViewDetail) return;
+    event.preventDefault();
+    onViewDetail(product);
+  };
+
   return (
     <div
       className={cn(
@@ -28,7 +34,11 @@ export function ProductCard({
       {...props}
     >
       {/* Product Image & Badges */}
-      <Link to={`/products/${product.id}`} className="block relative aspect-video w-full overflow-hidden rounded-xl bg-black/40 mb-4 cursor-pointer">
+      <Link
+        to={`/products/${product.id}`}
+        onClick={handleViewDetail}
+        className="block relative aspect-video w-full overflow-hidden rounded-xl bg-black/40 mb-4 cursor-pointer"
+      >
         {product.imageUrl ? (
           <img
             src={product.imageUrl}
@@ -51,6 +61,7 @@ export function ProductCard({
       <div className="flex-1 flex flex-col">
         <Link
           to={`/products/${product.id}`}
+          onClick={handleViewDetail}
           className="text-lg font-bold text-[#F8FAFC] tracking-tight hover:text-[#0EA5FF] cursor-pointer transition-colors line-clamp-1"
         >
           {product.name}

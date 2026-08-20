@@ -17,7 +17,7 @@ export function Chip({ status = 'online', dot = true, className, children, ...pr
   return (
     <div
       className={cn(
-        'inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#101521E6] border border-white/10 text-xs font-semibold font-mono tracking-wider uppercase text-[#DCE4F8]',
+        'inline-flex self-start items-center gap-2 px-3 py-1.5 rounded-full bg-[#101521E6] border border-white/10 text-xs font-semibold font-mono tracking-wider uppercase text-[#DCE4F8]',
         className
       )}
       {...props}

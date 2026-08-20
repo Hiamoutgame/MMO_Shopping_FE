@@ -195,22 +195,20 @@ export default function ProductDetailPage() {
           <button
             type="button"
             onClick={() => setActiveTab('desc')}
-            className={`text-base font-bold pb-2 transition-colors cursor-pointer ${
-              activeTab === 'desc'
+            className={`text-base font-bold pb-2 transition-colors cursor-pointer ${activeTab === 'desc'
                 ? 'text-[#0EA5FF] border-b-2 border-[#0EA5FF]'
                 : 'text-[#94A3B8] hover:text-white'
-            }`}
+              }`}
           >
             Mô Tả & Hướng Dẫn Sử Dụng
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('policy')}
-            className={`text-base font-bold pb-2 transition-colors cursor-pointer ${
-              activeTab === 'policy'
+            className={`text-base font-bold pb-2 transition-colors cursor-pointer ${activeTab === 'policy'
                 ? 'text-[#0EA5FF] border-b-2 border-[#0EA5FF]'
                 : 'text-[#94A3B8] hover:text-white'
-            }`}
+              }`}
           >
             Chính Sách Bảo Hành
           </button>
