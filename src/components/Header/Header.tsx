@@ -1,12 +1,19 @@
 
-import { NavLink, Link } from 'react-router-dom';
+import { NavLink, Link, useNavigate } from 'react-router-dom';
 import { APP_CONSTANTS } from '../../common/const/app';
 import { useCartStore } from '../../common/stores/useCartStore';
+import { useAuthStore } from '../../common/stores/useAuthStore';
+import { identityApi } from '../../common/apis/identityApi';
+import { session } from '../../common/apis/session';
 import { Button } from '../Button/Button';
 import { cn } from '../../common/libs/cn';
 
 export function Header() {
+  const navigate = useNavigate();
   const totalItems = useCartStore((state) => state.getTotalItems());
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const user = useAuthStore((state) => state.user);
+  const clearAuth = useAuthStore((state) => state.clearAuth);
 
   const navLinks = [
     { label: 'Sản phẩm', path: APP_CONSTANTS.ROUTES.PRODUCTS },
@@ -15,6 +22,17 @@ export function Header() {
     { label: 'Chính sách', path: APP_CONSTANTS.ROUTES.POLICY },
     { label: 'Liên hệ', path: APP_CONSTANTS.ROUTES.CONTACT },
   ];
+
+  const handleLogout = async () => {
+    const refreshToken = session.getRefreshToken();
+    try {
+      await identityApi.logout(refreshToken ? { refreshToken } : {});
+    } catch {
+      // Luôn dọn local session kể cả khi API lỗi.
+    }
+    clearAuth();
+    navigate(APP_CONSTANTS.ROUTES.PRODUCTS, { replace: true });
+  };
 
   return (
     <header className="w-full flex justify-center py-6 bg-[#07080D] sticky top-0 z-50">
@@ -60,16 +78,36 @@ export function Header() {
                 </span>
               )}
           </Link>
-          <Link className="hidden sm:block" to={APP_CONSTANTS.ROUTES.LOGIN}>
-            <Button variant="secondary" className="h-[42px] px-4 rounded-[14px]">
-              Đăng nhập
-            </Button>
-          </Link>
-          <Link className="hidden sm:block" to={APP_CONSTANTS.ROUTES.REGISTER}>
-            <Button variant="primary" className="h-[42px] px-4 rounded-[14px]">
-              Đăng ký
-            </Button>
-          </Link>
+          {isAuthenticated ? (
+            <>
+              <span className="hidden sm:block max-w-[140px] truncate text-[13px] font-medium text-[#DCE4F8]">
+                {user?.displayName || user?.email}
+              </span>
+              {user?.role === 'admin' && (
+                <Link className="hidden sm:block" to={APP_CONSTANTS.ROUTES.ADMIN}>
+                  <Button variant="secondary" className="h-[42px] px-4 rounded-[14px]">
+                    Admin
+                  </Button>
+                </Link>
+              )}
+              <Button variant="secondary" onClick={handleLogout} className="h-[42px] px-4 rounded-[14px]">
+                Đăng xuất
+              </Button>
+            </>
+          ) : (
+            <>
+              <Link className="hidden sm:block" to={APP_CONSTANTS.ROUTES.LOGIN}>
+                <Button variant="secondary" className="h-[42px] px-4 rounded-[14px]">
+                  Đăng nhập
+                </Button>
+              </Link>
+              <Link className="hidden sm:block" to={APP_CONSTANTS.ROUTES.REGISTER}>
+                <Button variant="primary" className="h-[42px] px-4 rounded-[14px]">
+                  Đăng ký
+                </Button>
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </header>

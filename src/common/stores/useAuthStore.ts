@@ -1,28 +1,33 @@
 import { create } from 'zustand';
-import type { User, AuthTokens } from '../models/user';
-import { storage } from '../libs/storage';
-import { APP_CONSTANTS } from '../const/app';
+import type { AuthTokens, User } from '../models/user';
+import { session } from '../apis/session';
 
 interface AuthState {
   user: User | null;
   tokens: AuthTokens | null;
   isAuthenticated: boolean;
+  isInitializing: boolean;
   setAuth: (user: User, tokens: AuthTokens) => void;
-  logout: () => void;
+  setUser: (user: User) => void;
+  clearAuth: () => void;
+  startInitializing: () => void;
+  finishInitializing: () => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   tokens: null,
-  isAuthenticated: !!storage.get(APP_CONSTANTS.STORAGE_KEYS.ACCESS_TOKEN),
+  isAuthenticated: false,
+  isInitializing: false,
   setAuth: (user, tokens) => {
-    storage.set(APP_CONSTANTS.STORAGE_KEYS.ACCESS_TOKEN, tokens.accessToken);
-    storage.set(APP_CONSTANTS.STORAGE_KEYS.REFRESH_TOKEN, tokens.refreshToken);
+    session.setTokens({ accessToken: tokens.accessToken, refreshToken: tokens.refreshToken });
     set({ user, tokens, isAuthenticated: true });
   },
-  logout: () => {
-    storage.remove(APP_CONSTANTS.STORAGE_KEYS.ACCESS_TOKEN);
-    storage.remove(APP_CONSTANTS.STORAGE_KEYS.REFRESH_TOKEN);
+  setUser: (user) => set({ user, isAuthenticated: true }),
+  clearAuth: () => {
+    session.clear();
     set({ user: null, tokens: null, isAuthenticated: false });
   },
+  startInitializing: () => set({ isInitializing: true }),
+  finishInitializing: () => set({ isInitializing: false }),
 }));

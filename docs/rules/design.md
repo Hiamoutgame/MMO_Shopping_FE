@@ -115,3 +115,34 @@ Gồm 3 phần:
 - [ ] Body gap 80, padding `[96,112]` hoặc `[72,96]`.
 - [ ] Text contrast rõ, text dài fixed-width + fill_container.
 - [ ] Footer padding `[28,112]`, format đúng quy định.
+
+## 7. Admin UI (Quản Trị)
+
+Admin là **operational dashboard**, ưu tiên scan nhanh và thao tác, KHÔNG dùng hero marketing lớn.
+
+### 7.1 Nguyên tắc
+- Vẫn giữ dark SaaS style hiện có (palette + token ở mục 2), nhưng layout **gọn, dense**, dùng tối đa chiều rộng.
+- Ưu tiên: bảng dữ liệu (table), filter bar, pagination, modal/drawer cho form, confirm dialog cho thao tác phá hủy.
+- Không dùng: hero lớn, glow ellipse marketing, section spacing `gap 80`, navbar tròn `radius 32` cho admin.
+- Text/row rõ, dễ quét; trạng thái dùng status badge (pill) nhất quán.
+
+### 7.2 Bố cục khung
+- **AdminLayout**: sidebar trái (nav mục admin) + topbar (tiêu đề, tài khoản, logout) + vùng content cuộn.
+- Sidebar: nền `#0B1020CC`, item active `#162033CC`, text `#DCE4F8`; item inactive text `#94A3B8`.
+- Content: padding gọn `[24,28]`, panel/card fill `#0C101CEE`, stroke `#FFFFFF14`, radius `18`.
+
+### 7.3 Thành phần dùng lại (shared)
+- **Data table**: header sticky, row hover, text `#DCE4F8`, số/tiền căn phải, có empty state.
+- **Status badge**: pill radius `999`, dot màu, label Geist Mono 11–12 uppercase.
+- **Filter bar + pagination**: filter theo query backend; pagination theo `totalPages`.
+- **Form modal/drawer**: cho CRUD; validate Zod; nút submit disabled khi đang chạy.
+- **Confirm dialog**: bắt buộc trước delete/refund/status change phá hủy.
+
+### 7.4 Checklist Admin
+- [ ] Có `RequireAdmin` chặn guest + user thường; 403 hiển thị rõ.
+- [ ] Sidebar responsive (thu gọn/mobile), table overflow ngang không bể layout.
+- [ ] Mỗi page gọi API có loading, empty, error, retry, disabled submit.
+- [ ] Tiền render decimal string qua formatter, không tính bằng `number`.
+- [ ] Thao tác phá hủy có confirm; mutation có `Idempotency-Key` khi backend yêu cầu.
+
+> Admin UI nên đọc thêm skill `design-taste-frontend` (local skill project) cùng các file `docs/rules/*` trước khi sửa admin.

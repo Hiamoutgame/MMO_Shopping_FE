@@ -15,5 +15,6 @@ export const APP_CONSTANTS = {
     CONTACT: '/contact',
     LOGIN: '/login',
     REGISTER: '/register',
+    ADMIN: '/admin',
   },
 } as const;

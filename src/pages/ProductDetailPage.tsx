@@ -1,13 +1,27 @@
-import { useState, useMemo } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { MOCK_PRODUCTS } from '../common/mocks/products';
+import { catalogApi } from '../common/apis/catalogApi';
+import { shoppingApi } from '../common/apis/shoppingApi';
+import { mapProductDto } from '../common/mapping/catalog';
+import type { Product, ProductVariant } from '../common/models/product';
 import { formatCurrency } from '../common/libs/formatter';
+import { useAuthStore } from '../common/stores/useAuthStore';
 import { Button } from '../components/Button/Button';
 import { Chip } from '../components/Chip/Chip';
 import { InfoCard } from '../components/InfoCard/InfoCard';
-import { ProductCard } from '../components/ProductCard/ProductCard';
 import { useCartStore } from '../common/stores/useCartStore';
 import { APP_CONSTANTS } from '../common/const/app';
+
+const SESSION_ID_KEY = 'mmo_anonymous_session_id';
+
+function getAnonymousSessionId(): string {
+  let sessionId = window.sessionStorage.getItem(SESSION_ID_KEY);
+  if (!sessionId) {
+    sessionId = crypto.randomUUID();
+    window.sessionStorage.setItem(SESSION_ID_KEY, sessionId);
+  }
+  return sessionId;
+}
 
 export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -15,27 +29,135 @@ export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<'desc' | 'policy'>('desc');
 
+  const [product, setProduct] = useState<Product | null>(null);
+  const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [notFound, setNotFound] = useState(false);
+
   const addToCart = useCartStore((state) => state.addToCart);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const viewRecordedRef = useRef(false);
+  const [reloadKey, setReloadKey] = useState(0);
 
-  // Find product by id or fallback to first product
-  const product = useMemo(() => {
-    return MOCK_PRODUCTS.find((p) => p.id === id) || MOCK_PRODUCTS[0];
-  }, [id]);
+  useEffect(() => {
+    if (!id) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const result = await catalogApi.getProduct(id);
+        if (cancelled) return;
+        const mapped = mapProductDto(result.product);
+        setProduct(mapped);
+        setSelectedVariantId(mapped.variants?.[0]?.id ?? null);
+        setNotFound(false);
+        setError(null);
+      } catch (err) {
+        if (cancelled) return;
+        const apiError = err as { status?: number | null };
+        if (apiError.status === 404) {
+          setNotFound(true);
+        } else {
+          setError(err instanceof Error ? err.message : 'Không thể tải sản phẩm.');
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [id, reloadKey]);
 
-  // Related products
-  const relatedProducts = useMemo(() => {
-    return MOCK_PRODUCTS.filter((p) => p.id !== product.id).slice(0, 3);
-  }, [product]);
+  // Record product view đúng một lần cho mỗi lần mở detail hợp lệ.
+  useEffect(() => {
+    if (!id || !product || viewRecordedRef.current) return;
+    viewRecordedRef.current = true;
+
+    const payload: { productId: string; sessionId?: string } = { productId: id };
+    if (!isAuthenticated) {
+      payload.sessionId = getAnonymousSessionId();
+    }
+
+    shoppingApi.recordProductView(payload).catch(() => {
+      // View tracking failure không chặn việc xem product detail.
+    });
+  }, [id, product, isAuthenticated]);
+
+  const productVariants = useMemo<ProductVariant[]>(
+    () => product?.variants ?? [],
+    [product]
+  );
+
+  const selectedVariant = useMemo(
+    () => productVariants.find((variant) => variant.id === selectedVariantId) ?? null,
+    [productVariants, selectedVariantId]
+  );
+
+  const displayPrice = selectedVariant?.price ?? product?.price ?? '0';
+
+  const handleVariantChange = (variantId: string) => {
+    setSelectedVariantId(variantId);
+    setQuantity(1);
+  };
 
   const handleAddToCart = () => {
+    if (!product) return;
+    // GĐ3 sẽ chuyển add-to-cart sang POST /cart/items với productVariantId.
     addToCart(product, quantity);
-    alert(`Đã thêm ${quantity} x ${product.name} vào giỏ hàng!`);
   };
 
   const handleBuyNow = () => {
+    if (!product) return;
     addToCart(product, quantity);
     navigate(APP_CONSTANTS.ROUTES.CART);
   };
+
+  const handleRetry = () => {
+    setLoading(true);
+    setError(null);
+    setNotFound(false);
+    setReloadKey((key) => key + 1);
+  };
+
+  if (loading) {
+    return (
+      <div className="w-full max-w-[1440px] px-6 md:px-[96px] py-[48px] flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="w-9 h-9 border-4 border-[#162033CC] border-t-[#0EA5FF] rounded-full animate-spin mx-auto mb-3" />
+          <p className="text-sm font-medium text-[#94A3B8]">Đang tải sản phẩm...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (notFound || !product) {
+    return (
+      <div className="w-full max-w-[1440px] px-6 md:px-[96px] py-[48px] flex items-center justify-center min-h-[400px]">
+        <div className="text-center flex flex-col items-center gap-4">
+          <h1 className="text-2xl font-bold text-white">Không tìm thấy sản phẩm</h1>
+          <p className="text-[#94A3B8]">Sản phẩm không tồn tại hoặc đã ngừng bán.</p>
+          <Link to={APP_CONSTANTS.ROUTES.PRODUCTS}>
+            <Button type="button" variant="primary" size="lg">Quay lại danh sách sản phẩm</Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="w-full max-w-[1440px] px-6 md:px-[96px] py-[48px] flex items-center justify-center min-h-[400px]">
+        <div className="text-center flex flex-col items-center gap-4">
+          <h1 className="text-2xl font-bold text-white">Không thể tải sản phẩm</h1>
+          <p className="text-[#94A3B8]">{error}</p>
+          <Button type="button" variant="primary" size="lg" onClick={handleRetry}>Thử lại</Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-[1440px] px-6 md:px-[96px] py-[48px] flex flex-col gap-12 relative">
@@ -57,11 +179,11 @@ export default function ProductDetailPage() {
         {/* Left Column: Image & Feature Checklist */}
         <div className="lg:col-span-5 flex flex-col gap-6">
           <div className="relative aspect-video lg:aspect-square w-full rounded-[24px] overflow-hidden bg-black/50 border border-white/10 shadow-[0_18px_38px_rgba(0,0,0,0.5)]">
-            <img
-              src={product.imageUrl}
-              alt={product.name}
-              className="w-full h-full object-cover"
-            />
+            {product.imageUrl ? (
+              <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center text-[#566079] font-mono text-sm">NO IMAGE</div>
+            )}
             <div className="absolute top-4 left-4 flex gap-2">
               <Chip status={product.status}>
                 {product.status === 'online' ? 'Trực tuyến 24/7' : 'Tạm hết hàng'}
@@ -96,9 +218,36 @@ export default function ProductDetailPage() {
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-3">
               <span className="px-3 py-1 rounded-full bg-[#101521E6] border border-[#0EA5FF]/30 text-xs font-mono font-semibold text-[#0EA5FF] uppercase">
-                {product.category}
+                {product.category || 'Sản phẩm'}
               </span>
             </div>
+            {productVariants.length > 1 && (
+              <div className="flex flex-col gap-3 pt-2">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-sm font-semibold text-[#DCE4F8]">Chọn gói sản phẩm</span>
+                  <span className="text-xs text-[#566079]">{productVariants.length} lựa chọn</span>
+                </div>
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  {productVariants.map((variant) => {
+                    const isSelected = variant.id === selectedVariantId;
+                    return (
+                      <button
+                        key={variant.id}
+                        type="button"
+                        aria-pressed={isSelected}
+                        onClick={() => handleVariantChange(variant.id)}
+                        className={`flex min-h-16 flex-col items-start justify-center rounded-xl border px-4 py-3 text-left transition-colors ${isSelected ? 'border-[#0EA5FF] bg-[#0EA5FF]/10' : 'border-white/10 bg-[#0C101CEE] hover:border-white/25'}`}
+                      >
+                        <span className={`text-sm font-bold ${isSelected ? 'text-[#F8FAFC]' : 'text-[#DCE4F8]'}`}>
+                          {variant.name || product.name}
+                        </span>
+                        <span className="mt-1 text-xs font-mono text-[#94A3B8]">{formatCurrency(variant.price)}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
             <h1 className="text-3xl md:text-[38px] font-bold text-white tracking-tight leading-tight">
               {product.name}
             </h1>
@@ -113,21 +262,10 @@ export default function ProductDetailPage() {
               <span className="text-xs text-[#566079] font-mono uppercase tracking-wider">GIÁ BÁN NIÊM YẾT</span>
               <div className="flex items-baseline gap-3 mt-1">
                 <span className="text-3xl md:text-4xl font-extrabold font-mono text-white">
-                  {formatCurrency(product.price)}
+                  {formatCurrency(displayPrice)}
                 </span>
-                {product.originalPrice && (
-                  <span className="text-sm text-[#566079] line-through font-mono">
-                    {formatCurrency(product.originalPrice)}
-                  </span>
-                )}
               </div>
             </div>
-
-            {product.originalPrice && (
-              <span className="px-3 py-1.5 rounded-xl bg-[#35FFB1]/10 border border-[#35FFB1]/30 text-xs font-mono font-bold text-[#35FFB1]">
-                TIẾT KIỆM {Math.round((1 - product.price / product.originalPrice) * 100)}%
-              </span>
-            )}
           </div>
 
           {/* Quantity Selector & Actions */}
@@ -167,24 +305,9 @@ export default function ProductDetailPage() {
 
           {/* Service Commitments List (InfoCard) */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-4 border-t border-white/5">
-            <InfoCard
-              label="BẢO HÀNH"
-              title="1 Đổi 1"
-              desc="Hỗ trợ ngay lập tức"
-              icon={<span>🛡️</span>}
-            />
-            <InfoCard
-              label="TỐC ĐỘ"
-              title="10 Giây"
-              desc="Kích hoạt tự động"
-              icon={<span>⚡</span>}
-            />
-            <InfoCard
-              label="HỖ TRỢ"
-              title="24/7 Online"
-              desc="Kỹ thuật chuyên sâu"
-              icon={<span>💬</span>}
-            />
+            <InfoCard label="BẢO HÀNH" title="1 Đổi 1" desc="Hỗ trợ ngay lập tức" icon={<span>🛡️</span>} />
+            <InfoCard label="TỐC ĐỘ" title="10 Giây" desc="Kích hoạt tự động" icon={<span>⚡</span>} />
+            <InfoCard label="HỖ TRỢ" title="24/7 Online" desc="Kỹ thuật chuyên sâu" icon={<span>💬</span>} />
           </div>
         </div>
       </div>
@@ -195,20 +318,14 @@ export default function ProductDetailPage() {
           <button
             type="button"
             onClick={() => setActiveTab('desc')}
-            className={`text-base font-bold pb-2 transition-colors cursor-pointer ${activeTab === 'desc'
-                ? 'text-[#0EA5FF] border-b-2 border-[#0EA5FF]'
-                : 'text-[#94A3B8] hover:text-white'
-              }`}
+            className={`text-base font-bold pb-2 transition-colors cursor-pointer ${activeTab === 'desc' ? 'text-[#0EA5FF] border-b-2 border-[#0EA5FF]' : 'text-[#94A3B8] hover:text-white'}`}
           >
             Mô Tả & Hướng Dẫn Sử Dụng
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('policy')}
-            className={`text-base font-bold pb-2 transition-colors cursor-pointer ${activeTab === 'policy'
-                ? 'text-[#0EA5FF] border-b-2 border-[#0EA5FF]'
-                : 'text-[#94A3B8] hover:text-white'
-              }`}
+            className={`text-base font-bold pb-2 transition-colors cursor-pointer ${activeTab === 'policy' ? 'text-[#0EA5FF] border-b-2 border-[#0EA5FF]' : 'text-[#94A3B8] hover:text-white'}`}
           >
             Chính Sách Bảo Hành
           </button>
@@ -244,14 +361,28 @@ export default function ProductDetailPage() {
       </div>
 
       {/* Related Products Grid */}
-      <div className="flex flex-col gap-6 pt-6">
-        <h2 className="text-2xl font-bold text-white">Sản Phẩm Tương Tự</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {relatedProducts.map((prod) => (
-            <ProductCard key={prod.id} product={prod} />
-          ))}
+      {product.variants && product.variants.length > 1 && (
+        <div className="flex flex-col gap-6 pt-6">
+          <h2 className="text-2xl font-bold text-white">Các gói khác</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {product.variants.slice(0, 3).map((variant) => (
+              <VariantCard key={variant.id} variant={variant} />
+            ))}
+          </div>
         </div>
-      </div>
+      )}
+    </div>
+  );
+}
+
+function VariantCard({ variant }: { variant: ProductVariant }) {
+  return (
+    <div className="rounded-[18px] bg-[#0C101CEE] border border-white/10 p-5 flex flex-col gap-2">
+      <span className="text-sm font-bold text-[#F8FAFC]">{variant.name}</span>
+      <span className="text-lg font-extrabold font-mono text-white">{formatCurrency(variant.price)}</span>
+      <span className="text-xs text-[#566079]">
+        {variant.availableQuantity > 0 ? `Còn ${variant.availableQuantity}` : 'Hết hàng'}
+      </span>
     </div>
   );
 }

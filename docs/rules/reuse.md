@@ -85,3 +85,23 @@ export function Button({
 | **Component** | `src/components/` | Đóng gói UI, nhận props render       |    ❌    |  Chỉ UI state nhỏ  |
 | **Layout**    | `src/layouts/`    | Khung trang (Header/Footer wrapper)  |    ❌    |         ❌         |
 | **Page**      | `src/pages/`      | Container chính, kết nối API/Zustand |    ✅    | ✅ State nghiệp vụ |
+
+---
+
+## 4. 🧩 Shared Admin Components (Tái sử dụng cho Admin v1)
+
+Admin có nhiều trang CRUD/list/detail cùng pattern. KHÔNG copy UI riêng lẻ cho từng page; dùng shared component trong `src/components/`:
+
+| Component | Mục đích | Trạng thái tái sử dụng |
+| :-------- | :------- | :--------------------- |
+| `AdminTable` | Bảng dữ liệu có header/row/empty | Dùng chung mọi list admin |
+| `StatusBadge` | Pill trạng thái (màu + dot + label) | Dùng chung order/voucher/account/... |
+| `FilterBar` | Thanh lọc + search + trigger pagination | Dùng chung list |
+| `Pagination` | Phân trang theo `totalPages` | Dùng chung list |
+| `FormModal` / `FormDrawer` | Khung form CRUD (create/edit) | Dùng chung create/update |
+| `ConfirmDialog` | Xác nhận thao tác phá hủy (delete/refund/status) | Dùng chung destructive action |
+
+Quy tắc:
+- Shared component chỉ nhận props + phát event; không tự gọi API, không tự đọc mock.
+- Mapper DTO → UI model đặt ở `common/mapping`; page nhận UI model đã chuẩn hóa.
+- Tiền/giá luôn decimal string, chỉ format ở render.

@@ -22,7 +22,7 @@ Mô tả: Thư mục gốc chứa toàn bộ mã nguồn Frontend.
 - **Context:** Shared Core & Logic / Dùng chung toàn dự án.
 - **Rules:** Must be highly reusable. No page-specific logic here.
 - **Sub-directories:**
-  - `apis/`: API services, request/response configs, backend connections.
+  - `apis/`: API services, request/response configs, backend connections. Admin request đặt trong `common/apis/adminApi.ts` (hoặc chia theo domain admin).
   - `const/`: Global constants.
   - `libs/`: Custom wrappers/libraries (axios, storage, formatter).
   - `mapping/`: Data transformers (API ↔ UI format).
@@ -41,14 +41,16 @@ Mô tả: Thư mục gốc chứa toàn bộ mã nguồn Frontend.
 
 ### 5. 🖼️ `layouts/`
 - **Context:** Page Wrappers / Khung giao diện chung.
-- **Rules:** Define structural layout, not content.
+- **Rules:** Define structural layout, not content. Layout KHÔNG gọi API, KHÔNG chứa business logic của page cụ thể.
 - **Examples:** 
   - Public layout, Auth layout, Admin dashboard layout.
   - Shared sections: Header, Sidebar, Footer.
+- **Admin layout:** `layouts/AdminLayout` chứa sidebar + topbar + vùng content. Chỉ render khung, không gọi API.
 
 ### 6. 📄 `pages/`
 - **Context:** Main Screens & Views / Các trang chính.
 - **Rules:** Each folder maps to a screen/route. Page-specific components go inside their respective folder.
+- **Admin pages:** Đặt trong `pages/admin/*`. Mỗi trang map 1 route `/admin/*`. Page gọi `adminApi` và điều phối state; shared UI (table/badge/filter/form/confirm/pagination) đặt ở `components` để tái sử dụng.
 
 ### 7. 🛣️ `routes/`
 - **Context:** Navigation & Routing / Điều hướng.

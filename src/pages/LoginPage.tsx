@@ -1,21 +1,24 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { loginSchema } from '../common/libs/validation';
 import { useAuthStore } from '../common/stores/useAuthStore';
-import { MOCK_USER, MOCK_TOKENS } from '../common/mocks/auth';
+import { identityApi } from '../common/apis/identityApi';
+import { mapAuthAccountToUser } from '../common/mapping/identity';
+import type { ApiError } from '../common/models/common';
 import { Button } from '../components/Button/Button';
 import { Input } from '../components/Input/Input';
 import { APP_CONSTANTS } from '../common/const/app';
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const setAuth = useAuthStore((state) => state.setAuth);
 
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
 
@@ -32,12 +35,26 @@ export default function LoginPage() {
     }
 
     setLoading(true);
-    setTimeout(() => {
-      setAuth(MOCK_USER, MOCK_TOKENS);
+    try {
+      const auth = await identityApi.login(result.data);
+      const tokens = auth.tokens;
+      const user = mapAuthAccountToUser(auth.account);
+      setAuth(user, {
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+        expiresIn: tokens.expiresIn,
+      });
+
+      const returnTo = searchParams.get('returnTo');
+      const defaultRoute =
+        user.role === 'admin' ? APP_CONSTANTS.ROUTES.ADMIN : APP_CONSTANTS.ROUTES.PRODUCTS;
+      navigate(returnTo || defaultRoute, { replace: true });
+    } catch (error) {
+      const apiError = error as ApiError;
+      setErrors({ password: apiError.message || 'Đăng nhập thất bại.' });
+    } finally {
       setLoading(false);
-      alert('Đăng nhập thành công!');
-      navigate(APP_CONSTANTS.ROUTES.PRODUCTS);
-    }, 500);
+    }
   };
 
   return (

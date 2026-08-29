@@ -55,7 +55,7 @@ export function CatalogProductCard({
           to={`/products/${product.id}`}
           className="mt-2 block min-h-[38px] text-[14px] font-extrabold leading-[1.28] text-[#f8fafc] transition-colors line-clamp-2 hover:text-[#35ffb1]"
         >
-          {product.name} dùng chung
+          {product.name}
         </Link>
       </div>
 

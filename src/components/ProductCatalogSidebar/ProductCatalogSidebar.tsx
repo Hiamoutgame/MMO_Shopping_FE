@@ -1,12 +1,16 @@
-import type { CatalogCategory, CatalogCategoryKey } from '../../common/libs/productCatalog';
 import { cn } from '../../common/libs/cn';
 
+export interface CatalogFilterOption {
+  key: string;
+  label: string;
+}
+
 export interface ProductCatalogSidebarProps {
-  categories: CatalogCategory[];
-  selectedCategory: CatalogCategoryKey;
+  categories: CatalogFilterOption[];
+  selectedCategory: string;
   searchValue: string;
   onSearchChange: (value: string) => void;
-  onCategoryChange: (category: CatalogCategoryKey) => void;
+  onCategoryChange: (category: string) => void;
   onReset: () => void;
   className?: string;
 }

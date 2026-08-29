@@ -1,7 +1,10 @@
 import { Suspense } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { APP_CONSTANTS } from '../common/const/app';
-import { MainLayout, AuthLayout } from '../layouts';
+import { MainLayout, AuthLayout, AdminLayout } from '../layouts';
+import { RequireAuth } from '../components/RequireAuth/RequireAuth';
+import { RequireAdmin } from '../components/RequireAdmin/RequireAdmin';
+import { useSessionRestore } from '../hooks/useSessionRestore';
 import {
   HomePage,
   ProductsPage,
@@ -13,6 +16,14 @@ import {
   LoginPage,
   RegisterPage,
   NotFoundPage,
+  AdminDashboardPage,
+  AdminAccountsPage,
+  AdminCatalogPage,
+  AdminInventoryPage,
+  AdminOrdersPage,
+  AdminVouchersPage,
+  AdminFinancePage,
+  AdminAuditLogsPage,
 } from './lazyComponents';
 
 function LoadingFallback() {
@@ -26,24 +37,40 @@ function LoadingFallback() {
   );
 }
 
+function SessionRestoreBridge() {
+  useSessionRestore();
+  return null;
+}
+
 export function AppRouter() {
   return (
     <BrowserRouter>
+      <SessionRestoreBridge />
       <Suspense fallback={<LoadingFallback />}>
         <Routes>
           {/* Main Layout Routes */}
           <Route path={APP_CONSTANTS.ROUTES.HOME} element={<MainLayout pageTitle="TRANG CHỦ"><HomePage /></MainLayout>} />
           <Route path={APP_CONSTANTS.ROUTES.PRODUCTS} element={<MainLayout pageTitle="SẢN PHẨM"><ProductsPage /></MainLayout>} />
           <Route path={APP_CONSTANTS.ROUTES.PRODUCT_DETAIL} element={<MainLayout pageTitle="CHI TIẾT"><ProductDetailPage /></MainLayout>} />
-          <Route path={APP_CONSTANTS.ROUTES.CART} element={<MainLayout pageTitle="GIỎ HÀNG"><CartPage /></MainLayout>} />
-          <Route path={APP_CONSTANTS.ROUTES.SUPPORT} element={<MainLayout pageTitle="TIẾP SỨC"><SupportPage /></MainLayout>} />
+          <Route path={APP_CONSTANTS.ROUTES.CART} element={<MainLayout pageTitle="GIỎ HÀNG"><RequireAuth><CartPage /></RequireAuth></MainLayout>} />
+          <Route path={APP_CONSTANTS.ROUTES.SUPPORT} element={<MainLayout pageTitle="TIẾP SỨC"><RequireAuth><SupportPage /></RequireAuth></MainLayout>} />
           <Route path={APP_CONSTANTS.ROUTES.POLICY} element={<MainLayout pageTitle="CHÍNH SÁCH"><PolicyPage /></MainLayout>} />
           <Route path={APP_CONSTANTS.ROUTES.CONTACT} element={<MainLayout pageTitle="LIÊN HỆ"><ContactPage /></MainLayout>} />
           
           {/* Auth Layout Routes */}
           <Route path={APP_CONSTANTS.ROUTES.LOGIN} element={<AuthLayout><LoginPage /></AuthLayout>} />
           <Route path={APP_CONSTANTS.ROUTES.REGISTER} element={<AuthLayout><RegisterPage /></AuthLayout>} />
-          
+
+          {/* Admin Layout Routes */}
+          <Route path="/admin" element={<RequireAdmin><AdminLayout><AdminDashboardPage /></AdminLayout></RequireAdmin>} />
+          <Route path="/admin/accounts" element={<RequireAdmin><AdminLayout><AdminAccountsPage /></AdminLayout></RequireAdmin>} />
+          <Route path="/admin/catalog" element={<RequireAdmin><AdminLayout><AdminCatalogPage /></AdminLayout></RequireAdmin>} />
+          <Route path="/admin/inventory" element={<RequireAdmin><AdminLayout><AdminInventoryPage /></AdminLayout></RequireAdmin>} />
+          <Route path="/admin/orders" element={<RequireAdmin><AdminLayout><AdminOrdersPage /></AdminLayout></RequireAdmin>} />
+          <Route path="/admin/vouchers" element={<RequireAdmin><AdminLayout><AdminVouchersPage /></AdminLayout></RequireAdmin>} />
+          <Route path="/admin/finance" element={<RequireAdmin><AdminLayout><AdminFinancePage /></AdminLayout></RequireAdmin>} />
+          <Route path="/admin/audit-logs" element={<RequireAdmin><AdminLayout><AdminAuditLogsPage /></AdminLayout></RequireAdmin>} />
+
           {/* Fallback */}
           <Route path="*" element={<MainLayout pageTitle="404"><NotFoundPage /></MainLayout>} />
         </Routes>

@@ -1,12 +1,17 @@
+export type UserRole = 'user' | 'admin';
+
+export type UserStatus = 'active' | 'inactive' | 'suspended';
+
 export interface User {
   id: string;
   email: string;
-  fullName: string;
-  avatarUrl?: string;
-  role: 'user' | 'admin';
+  displayName: string;
+  role: UserRole;
+  status: UserStatus;
 }
 
 export interface AuthTokens {
   accessToken: string;
   refreshToken: string;
+  expiresIn?: number;
 }

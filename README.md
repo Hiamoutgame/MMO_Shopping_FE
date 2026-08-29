@@ -1,77 +1,77 @@
-# React + TypeScript + Vite
+# MMO Shopping — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Frontend React cho dự án **MMO Shopping** ("Chợ Tài Khoản AI"), kết nối API backend NestJS (`/api/v1`).
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+| Nhóm | Công nghệ |
+| :--- | :--- |
+| UI runtime | React 19, React DOM 19 |
+| Build | Vite, TypeScript |
+| Routing | React Router DOM 7 |
+| Styling | Tailwind CSS 4, `clsx`, `tailwind-merge` |
+| Client state | Zustand 5 |
+| HTTP | Axios (một client duy nhất `common/apis/httpClient.ts`) |
+| Validation | Zod |
 
-## React Compiler
+## Chạy dự án
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+```bash
+# Cài dependency
+pnpm install
 
-Note: This will impact Vite dev & build performances.
+# Dev server
+pnpm dev
 
-## Expanding the ESLint configuration
+# Build production
+pnpm build
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+# Preview bản build
+pnpm preview
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+# Lint
+pnpm lint
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Biến môi trường
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Copy `.env.example` thành `.env` rồi điều chỉnh:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+| Biến | Mô tả | Mặc định local |
+| :--- | :--- | :--- |
+| `VITE_API_BASE_URL` | Base path API frontend gọi | `/api/v1` |
+| `VITE_API_PROXY_TARGET` | Target proxy Vite dev | `http://127.0.0.1:3000` |
+| `VITE_ENABLE_SUPPORT_CODE` | Bật/tắt feature support-code (hiện `BLOCKED`) | `false` |
 
-```
+Vite proxy `/api` → `VITE_API_PROXY_TARGET` để dev tránh CORS (backend chưa bật `enableCors`).
+
+## Quality gate
+
+Bắt buộc trước khi kết thúc công việc:
+
+- `pnpm lint`
+- `pnpm build`
+
+Project chưa có test runner/script test — đừng mô tả test như năng lực đã có.
+
+## Tài liệu & rule bắt buộc đọc
+
+Trước khi sửa code, đọc:
+
+- `docs/rules/structure.md` — cấu trúc thư mục & trách nhiệm từng layer.
+- `docs/rules/design.md` — design system + section **Admin UI**.
+- `docs/rules/reuse.md` — layout/component tái sử dụng + shared admin components.
+- `docs/structure/FE.md` (trong repo gốc `MMO_Shopping/docs/structure/FE.md`) — kiến trúc tổng thể.
+
+## Local skill
+
+Project có local skill **`design-taste-frontend`** tại `.codex/skills/design-taste-frontend/` (nguồn `https://github.com/Leonxlnx/taste-skill`, biến thể v2 `design-taste-frontend`).
+
+- Dùng làm guideline UI chống "AI-slop" (layout, typography, spacing, motion).
+- Skill này hướng đến landing/portfolio nên áp dụng **có chọn lọc**: với admin, ưu tiên operational dashboard (dense, scan nhanh) theo `docs/rules/design.md` mục 7, không dùng hero marketing.
+
+## Kiến trúc admin v1
+
+- Route `/admin/*` bọc `RequireAdmin` (chặn guest + user thường) + `AdminLayout`.
+- `common/apis/adminApi.ts` gọi `/api/v1/admin/*`; DTO/mapper ở `common/models` + `common/mapping`.
+- Pages admin ở `pages/admin/*`; shared admin UI (table, status badge, filter bar, form modal, confirm dialog, pagination) ở `components`.

@@ -53,7 +53,7 @@ export function CartLineItem({ product, quantity, onQuantityChange, onRemove }: 
           </button>
         </div>
         <strong className="text-right text-sm font-extrabold font-mono text-white sm:text-base">
-          {formatCurrency(product.price * quantity)}
+          {formatCurrency(Number(product.price) * quantity)}
         </strong>
         <button
           type="button"

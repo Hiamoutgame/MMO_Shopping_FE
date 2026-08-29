@@ -67,6 +67,7 @@ export const useCartStore = create<CartState>((set, get) => ({
   },
 
   getTotalPrice: () => {
-    return get().items.reduce((total, item) => total + item.product.price * item.quantity, 0);
+    // Draft cart (GĐ3 sẽ thay bằng pricing từ backend): chỉ dùng cho hiển thị tạm.
+    return get().items.reduce((total, item) => total + Number(item.product.price) * item.quantity, 0);
   },
 }));

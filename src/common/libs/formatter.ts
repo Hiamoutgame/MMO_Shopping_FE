@@ -1,9 +1,11 @@
-export function formatCurrency(amount: number, currency: string = 'VND'): string {
+export function formatCurrency(amount: number | string, currency: string = 'VND'): string {
+  const value = typeof amount === 'string' ? Number(amount) : amount;
+  if (!Number.isFinite(value)) return '';
   return new Intl.NumberFormat('vi-VN', {
     style: 'currency',
     currency,
     maximumFractionDigits: 0,
-  }).format(amount);
+  }).format(value);
 }
 
 export function formatDate(dateInput: string | Date | number): string {

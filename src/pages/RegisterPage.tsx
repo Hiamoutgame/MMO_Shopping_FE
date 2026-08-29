@@ -1,15 +1,21 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { registerSchema } from '../common/libs/validation';
+import { useAuthStore } from '../common/stores/useAuthStore';
+import { identityApi } from '../common/apis/identityApi';
+import { mapAuthAccountToUser } from '../common/mapping/identity';
+import type { ApiError } from '../common/models/common';
 import { Button } from '../components/Button/Button';
 import { Input } from '../components/Input/Input';
 import { APP_CONSTANTS } from '../common/const/app';
 
 export default function RegisterPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const setAuth = useAuthStore((state) => state.setAuth);
 
   const [formData, setFormData] = useState({
-    fullName: '',
+    displayName: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -17,7 +23,7 @@ export default function RegisterPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
 
@@ -34,11 +40,35 @@ export default function RegisterPage() {
     }
 
     setLoading(true);
-    setTimeout(() => {
+    try {
+      const auth = await identityApi.register({
+        email: result.data.email,
+        password: result.data.password,
+        displayName: result.data.displayName,
+      });
+      const tokens = auth.tokens;
+      const user = mapAuthAccountToUser(auth.account);
+      setAuth(user, {
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+        expiresIn: tokens.expiresIn,
+      });
+
+      const returnTo = searchParams.get('returnTo');
+      const defaultRoute =
+        user.role === 'admin' ? APP_CONSTANTS.ROUTES.ADMIN : APP_CONSTANTS.ROUTES.PRODUCTS;
+      navigate(returnTo || defaultRoute, { replace: true });
+    } catch (error) {
+      const apiError = error as ApiError;
+      // Email đã tồn tại hiển thị tại trường email; lỗi khác hiển thị chung.
+      if (apiError.errorCode === 'EMAIL_ALREADY_EXISTS') {
+        setErrors({ email: apiError.message || 'Email đã tồn tại.' });
+      } else {
+        setErrors({ confirmPassword: apiError.message || 'Đăng ký thất bại.' });
+      }
+    } finally {
       setLoading(false);
-      alert('Đăng ký tài khoản thành công! Vui lòng đăng nhập.');
-      navigate(APP_CONSTANTS.ROUTES.LOGIN);
-    }, 500);
+    }
   };
 
   return (
@@ -57,10 +87,10 @@ export default function RegisterPage() {
           </label>
           <Input
             placeholder="Nguyễn Văn A"
-            value={formData.fullName}
-            onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+            value={formData.displayName}
+            onChange={(e) => setFormData({ ...formData, displayName: e.target.value })}
           />
-          {errors.fullName && <span className="text-xs text-[#FF5C5C]">{errors.fullName}</span>}
+          {errors.displayName && <span className="text-xs text-[#FF5C5C]">{errors.displayName}</span>}
         </div>
 
         <div className="flex flex-col gap-1.5">

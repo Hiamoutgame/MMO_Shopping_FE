@@ -7,7 +7,7 @@ export const loginSchema = z.object({
 
 export const registerSchema = z
   .object({
-    fullName: z.string().min(2, 'Họ tên phải từ 2 ký tự trở lên'),
+    displayName: z.string().min(2, 'Họ tên phải từ 2 ký tự trở lên'),
     email: z.string().min(1, 'Email không được để trống').email('Email không hợp lệ'),
     password: z.string().min(6, 'Mật khẩu phải có ít nhất 6 ký tự'),
     confirmPassword: z.string().min(1, 'Vui lòng xác nhận mật khẩu'),
