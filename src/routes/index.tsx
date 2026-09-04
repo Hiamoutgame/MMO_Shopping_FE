@@ -24,6 +24,12 @@ import {
   AdminVouchersPage,
   AdminFinancePage,
   AdminAuditLogsPage,
+  CashbackCenterPage,
+  CashbackLinkPage,
+  CashbackWalletPage,
+  CashbackOrdersPage,
+  CashbackWithdrawalsPage,
+  CashbackReferralsPage,
 } from './lazyComponents';
 
 function LoadingFallback() {
@@ -56,6 +62,14 @@ export function AppRouter() {
           <Route path={APP_CONSTANTS.ROUTES.SUPPORT} element={<MainLayout pageTitle="TIẾP SỨC"><RequireAuth><SupportPage /></RequireAuth></MainLayout>} />
           <Route path={APP_CONSTANTS.ROUTES.POLICY} element={<MainLayout pageTitle="CHÍNH SÁCH"><PolicyPage /></MainLayout>} />
           <Route path={APP_CONSTANTS.ROUTES.CONTACT} element={<MainLayout pageTitle="LIÊN HỆ"><ContactPage /></MainLayout>} />
+          <Route path={APP_CONSTANTS.ROUTES.CASHBACK} element={<MainLayout pageTitle="HOÀN PHÍ"><RequireAuth><CashbackCenterPage /></RequireAuth></MainLayout>}>
+            <Route index element={<CashbackLinkPage />} />
+            <Route path="wallet" element={<CashbackWalletPage />} />
+            <Route path="orders" element={<CashbackOrdersPage />} />
+            <Route path="orders/:id" element={<CashbackOrdersPage />} />
+            <Route path="withdrawals" element={<CashbackWithdrawalsPage />} />
+            <Route path="referrals" element={<CashbackReferralsPage />} />
+          </Route>
           
           {/* Auth Layout Routes */}
           <Route path={APP_CONSTANTS.ROUTES.LOGIN} element={<AuthLayout><LoginPage /></AuthLayout>} />

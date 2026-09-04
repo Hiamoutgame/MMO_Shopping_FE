@@ -23,3 +23,4 @@ export * from './ConfirmDialog/ConfirmDialog';
 export * from './AdminState/AdminState';
 export * from './AdminModal/AdminModal';
 export * from './AdminForm/AdminForm';
+export * from './CashbackState/CashbackState';

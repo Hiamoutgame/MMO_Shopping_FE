@@ -59,7 +59,7 @@ Gồm 3 phần:
   - Effect: background_blur radius `18`, shadow outer y `14` blur `30` color `#00000080`.
   - Layout: `horizontal`, justifyContent `space_between`, alignItems `center`, padding `[0,16]`.
 - **Cụm Left Brand**: Logo 32x32 (radius 10, brand gradient) + Text "Chợ Tài Khoản AI" (Inter 15/800 `#F8FAFC`).
-- **Cụm Center Nav** (5 mục: Sản phẩm, Giỏ hàng, Tiếp sức, Chính sách, Liên hệ — KHÔNG dùng mục "Bảo hành"):
+- **Cụm Center Nav** (6 mục: Sản phẩm, Giỏ hàng, Tiếp sức, Chính sách, Liên hệ, Hoàn phí — KHÔNG dùng mục "Bảo hành"):
   - Nav item: height 32, padding `[0,14]` hoặc `[8,14]`, radius 18.
   - Active: fill `#162033CC`, text Inter 13/700 `#F8FAFC` hoặc `#E0E7FF`.
   - Inactive: fill transparent `#00000000`, text Inter 13/500-700 `#94A3B8` hoặc `#8C96B5`.
@@ -111,7 +111,7 @@ Gồm 3 phần:
 ## 6. Checklist Hoàn Thành
 - [ ] Page width 1440, fill `#07080D`.
 - [ ] Header 1200x64 trong Wrapper padding `[24,0]`, radius 32, blur, shadow.
-- [ ] Nav đủ 5 mục: Sản phẩm, Giỏ hàng, Tiếp sức, Chính sách, Liên hệ (không có "Bảo hành").
+- [ ] Nav đủ 6 mục: Sản phẩm, Giỏ hàng, Tiếp sức, Chính sách, Liên hệ, Hoàn phí (không có "Bảo hành").
 - [ ] Body gap 80, padding `[96,112]` hoặc `[72,96]`.
 - [ ] Text contrast rõ, text dài fixed-width + fill_container.
 - [ ] Footer padding `[28,112]`, format đúng quy định.

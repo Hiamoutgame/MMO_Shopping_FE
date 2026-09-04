@@ -42,8 +42,11 @@ Copy `.env.example` thành `.env` rồi điều chỉnh:
 | `VITE_API_BASE_URL` | Base path API frontend gọi | `/api/v1` |
 | `VITE_API_PROXY_TARGET` | Target proxy Vite dev | `http://127.0.0.1:3000` |
 | `VITE_ENABLE_SUPPORT_CODE` | Bật/tắt feature support-code (hiện `BLOCKED`) | `false` |
+| `VITE_ENABLE_CASHBACK` | Hiển thị Trung tâm Hoàn phí và tab điều hướng | `true` |
 
 Vite proxy `/api` → `VITE_API_PROXY_TARGET` để dev tránh CORS (backend chưa bật `enableCors`).
+
+API Hoàn Phí 247 được gọi qua backend façade `/api/v1/cashback`; không đặt URL hoặc token nhà cung cấp trong biến `VITE_*`. Backend cấu hình `HOANPHI_API_BASE_URL`, timeout và khóa mã hóa integration riêng.
 
 ## Quality gate
 
@@ -74,4 +77,5 @@ Project có local skill **`design-taste-frontend`** tại `.codex/skills/design-
 
 - Route `/admin/*` bọc `RequireAdmin` (chặn guest + user thường) + `AdminLayout`.
 - `common/apis/adminApi.ts` gọi `/api/v1/admin/*`; DTO/mapper ở `common/models` + `common/mapping`.
+- `common/apis/cashbackApi.ts` gọi `/api/v1/cashback/*`; token Hoàn Phí 247 luôn được giữ và mã hóa ở backend.
 - Pages admin ở `pages/admin/*`; shared admin UI (table, status badge, filter bar, form modal, confirm dialog, pagination) ở `components`.
