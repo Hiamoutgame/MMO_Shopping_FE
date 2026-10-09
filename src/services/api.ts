@@ -37,14 +37,6 @@ apiClient.interceptors.response.use(
 export default apiClient;
 
 // API Services
-export const authAPI = {
-  login: (email: string, password: string) =>
-    apiClient.post('/auth/login', { email, password }),
-  register: (data: { email: string; password: string; fullName: string }) =>
-    apiClient.post('/auth/register', data),
-  me: () => apiClient.get('/auth/me'),
-};
-
 export const seasonsAPI = {
   getAll: () => apiClient.get('/seasons'),
   getActive: () => apiClient.get('/seasons/active'),
@@ -56,21 +48,6 @@ export const seasonsAPI = {
   pause: (id: string) => apiClient.put(`/seasons/${id}/pause`),
   end: (id: string) => apiClient.put(`/seasons/${id}/end`),
   delete: (id: string) => apiClient.delete(`/seasons/${id}`),
-};
-
-export const chungSucAPI = {
-  getCampaigns: () => apiClient.get('/chung-suc/campaigns'),
-  getActiveCampaigns: () => apiClient.get('/chung-suc/campaigns/active'),
-  getCampaignById: (id: string) => apiClient.get(`/chung-suc/campaigns/${id}`),
-  getCampaignBySeason: (seasonId: string) =>
-    apiClient.get(`/chung-suc/campaigns/season/${seasonId}`),
-  createCampaign: (data: any) => apiClient.post('/chung-suc/campaigns', data),
-  updateCampaign: (id: string, data: any) =>
-    apiClient.put(`/chung-suc/campaigns/${id}`, data),
-  joinCampaign: (id: string, accountId: string, quantity: number) =>
-    apiClient.post(`/chung-suc/campaigns/${id}/join`, { accountId, quantity }),
-  getParticipants: (campaignId: string) =>
-    apiClient.get(`/chung-suc/campaigns/${campaignId}/participants`),
 };
 
 export const pricingAPI = {

@@ -28,6 +28,24 @@ export const API_PATHS = {
   CHECKOUT: {
     CREATE: '/checkout',
   },
+  CAMPAIGNS: {
+    LIST: '/campaigns',
+    ACTIVE: '/campaigns/active',
+    DETAIL: (id: string) => `/campaigns/${id}`,
+    JOIN: (id: string) => `/campaigns/${id}/join`,
+    PROGRESS: (id: string) => `/campaigns/${id}/progress`,
+    PARTICIPANTS: (id: string) => `/campaigns/${id}/participants`,
+    MY_REQUESTS: '/campaigns/requests/me',
+    CANCEL_REQUEST: (requestId: string) => `/campaigns/requests/${requestId}/cancel`,
+    LIFECYCLE: (id: string, action: 'activate' | 'pause' | 'end' | 'close') =>
+      `/campaigns/${id}/${action}`,
+  },
+  SEASONS: {
+    LIST: '/seasons',
+  },
+  PRICING: {
+    CALCULATE: '/pricing/calculate',
+  },
   CASHBACK: {
     CONFIG: '/cashback/config',
     CONNECTION: '/cashback/connection',

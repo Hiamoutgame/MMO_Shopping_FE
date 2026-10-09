@@ -1,216 +1,296 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { chungSucAPI, pricingAPI } from '../../services/api';
-import type { ChungSucCampaign, PriceCalculationResult } from '../../types/chung-suc.types';
+import { useEffect, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
+import { chungSucApi } from '../../common/apis/chungSucApi';
+import { useAuthStore } from '../../common/stores/useAuthStore';
+import type {
+  CampaignDto,
+  MyRequestDto,
+  ParticipantStatus,
+  PriceCalculationDto,
+} from '../../common/models/chungSuc';
+import type { ApiError } from '../../common/models/common';
+import { APP_CONSTANTS } from '../../common/const/app';
+import { formatCurrency, formatDateTime } from '../../common/libs/formatter';
+import { Button } from '../../components/Button/Button';
+import { Chip } from '../../components/Chip/Chip';
+import { PageContainer } from '../../components/PageContainer/PageContainer';
+import { QuantitySelector } from '../../components/QuantitySelector/QuantitySelector';
+import { SupportCodeInput } from '../../components/SupportCodeInput/SupportCodeInput';
 
-export function JoinChungSucPage() {
+const REQUEST_STATUS_LABELS: Record<ParticipantStatus, string> = {
+  PENDING: 'Chờ xử lý',
+  CHECKING: 'Đang kiểm tra mã',
+  PROCESSING: 'Đang tiếp sức',
+  SUCCESS: 'Hoàn tất',
+  PARTIAL_SUCCESS: 'Hoàn tất một phần',
+  FAILED: 'Thất bại',
+  CANCELLED: 'Đã hủy',
+};
+
+export default function JoinChungSucPage() {
   const { campaignId } = useParams<{ campaignId: string }>();
-  const navigate = useNavigate();
-  const [campaign, setCampaign] = useState<ChungSucCampaign | null>(null);
-  const [quantity, setQuantity] = useState(1);
-  const [sellerCode, setSellerCode] = useState('');
-  const [couponCode, setCouponCode] = useState('');
-  const [priceResult, setPriceResult] = useState<PriceCalculationResult | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [calculating, setCalculating] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState('');
+  const userId = useAuthStore((state) => state.user?.id);
 
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const [campaign, setCampaign] = useState<CampaignDto | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [inviteCode, setInviteCode] = useState('');
+  const [codeError, setCodeError] = useState('');
+  const [quantity, setQuantity] = useState(1);
+  const [price, setPrice] = useState<PriceCalculationDto | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitted, setSubmitted] = useState(false);
+  const [requests, setRequests] = useState<MyRequestDto[]>([]);
+  const [requestsKey, setRequestsKey] = useState(0);
+  const [cancellingId, setCancellingId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (campaignId) {
-      loadCampaign();
-    }
+    if (!campaignId) return;
+    let cancelled = false;
+    chungSucApi
+      .campaign(campaignId)
+      .then((item) => {
+        if (!cancelled) setCampaign(item);
+      })
+      .catch((err: unknown) => {
+        if (!cancelled) {
+          setLoadError((err as ApiError).message || 'Không thể tải thông tin chiến dịch.');
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [campaignId]);
 
   useEffect(() => {
-    if (campaign && user.id) {
-      calculatePrice();
-    }
-  }, [campaign, quantity, sellerCode, couponCode]);
-
-  const loadCampaign = async () => {
-    try {
-      setLoading(true);
-      const response = await chungSucAPI.getCampaignById(campaignId!);
-      setCampaign(response.data);
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Không thể tải thông tin chiến dịch');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const calculatePrice = async () => {
-    if (!campaign || !user.id) return;
-
-    try {
-      setCalculating(true);
-      const response = await pricingAPI.calculate({
-        productId: campaign.productId,
-        accountId: user.id,
-        quantity,
-        seasonId: campaign.seasonId,
-        sellerCode: sellerCode || undefined,
-        couponCode: couponCode || undefined,
+    if (!campaignId) return;
+    let cancelled = false;
+    chungSucApi
+      .myRequests()
+      .then((items) => {
+        if (!cancelled) setRequests(items.filter((item) => item.campaignId === campaignId));
+      })
+      .catch(() => {
+        if (!cancelled) setRequests([]);
       });
-      setPriceResult(response.data);
-    } catch (err: any) {
-      console.error('Price calculation error:', err);
-    } finally {
-      setCalculating(false);
-    }
+    return () => {
+      cancelled = true;
+    };
+  }, [campaignId, requestsKey]);
+
+  const productId = campaign?.productId;
+  const seasonId = campaign?.seasonId ?? undefined;
+
+  // Giá chỉ để tham khảo: gửi yêu cầu chưa tạo đơn và chưa trừ ví.
+  useEffect(() => {
+    if (!productId || !userId) return;
+    let cancelled = false;
+    chungSucApi
+      .calculatePrice({ productId, accountId: userId, quantity, seasonId })
+      .then((result) => {
+        if (!cancelled) setPrice(result);
+      })
+      .catch(() => {
+        if (!cancelled) setPrice(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [productId, seasonId, userId, quantity]);
+
+  if (loading) {
+    return (
+      <PageContainer>
+        <p className="text-sm text-[#94A3B8]">Đang tải chiến dịch...</p>
+      </PageContainer>
+    );
+  }
+
+  if (!campaign) {
+    return (
+      <PageContainer className="flex flex-col items-start gap-4">
+        <p className="text-sm text-[#FF5C5C]">{loadError || 'Không tìm thấy chiến dịch.'}</p>
+        <Link to={APP_CONSTANTS.ROUTES.CHUNG_SUC}>
+          <Button type="button" variant="secondary" size="sm">
+            ← Về danh sách chiến dịch
+          </Button>
+        </Link>
+      </PageContainer>
+    );
+  }
+
+  const canJoin = campaign.status === 'ACTIVE';
+
+  const handleCodeChange = (value: string) => {
+    setInviteCode(value);
+    setCodeError('');
+    setSubmitted(false);
   };
 
-  const handleJoin = async () => {
-    if (!campaign || !user.id) return;
+  const handleSubmit = async () => {
+    const code = inviteCode.trim();
+    if (!code) {
+      setCodeError('Vui lòng nhập mã mời trước khi gửi.');
+      return;
+    }
+    if (code.length > 100) {
+      setCodeError('Mã mời tối đa 100 ký tự.');
+      return;
+    }
 
+    setSubmitting(true);
+    setSubmitError(null);
     try {
-      setSubmitting(true);
-      setError('');
-      await chungSucAPI.joinCampaign(campaign.id, user.id, quantity);
-      alert('✅ Tham gia chiến dịch thành công!');
-      navigate('/chung-suc');
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Không thể tham gia chiến dịch');
+      await chungSucApi.join(campaign.id, { inviteCode: code, quantity });
+      setSubmitted(true);
+      setInviteCode('');
+      setQuantity(1);
+      setRequestsKey((key) => key + 1);
+    } catch (err) {
+      setSubmitError((err as ApiError).message || 'Không thể gửi yêu cầu.');
     } finally {
       setSubmitting(false);
     }
   };
 
-  if (loading) {
-    return <div className="loading-container"><div className="spinner" /></div>;
-  }
-
-  if (!campaign) {
-    return <div className="error-container">Không tìm thấy chiến dịch</div>;
-  }
-
-  const progress = (campaign.currentQuantity / campaign.targetQuantity) * 100;
+  const handleCancel = async (requestId: string) => {
+    setCancellingId(requestId);
+    setSubmitError(null);
+    try {
+      await chungSucApi.cancelRequest(requestId);
+    } catch (err) {
+      setSubmitError((err as ApiError).message || 'Không thể hủy yêu cầu.');
+    } finally {
+      setCancellingId(null);
+      setRequestsKey((key) => key + 1);
+    }
+  };
 
   return (
-    <div className="join-campaign-page">
-      <div className="campaign-summary">
-        <h1>{campaign.name}</h1>
-        <p>{campaign.description}</p>
-
-        <div className="progress-section">
-          <div className="progress-bar-container">
-            <div
-              className="progress-bar-fill"
-              style={{ width: `${Math.min(progress, 100)}%` }}
-            />
-          </div>
-          <div className="progress-text">
-            <span>{campaign.currentQuantity} / {campaign.targetQuantity}</span>
-            <span>{progress.toFixed(1)}%</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="join-form">
-        <h2>Thông tin đặt hàng</h2>
-
-        <div className="form-group">
-          <label>Số lượng:</label>
-          <input
-            type="number"
-            min="1"
-            value={quantity}
-            onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-            className="input-number"
-          />
-        </div>
-
-        <div className="form-group">
-          <label>Mã giới thiệu Seller (tùy chọn):</label>
-          <input
-            type="text"
-            placeholder="VD: SELLER2024"
-            value={sellerCode}
-            onChange={(e) => setSellerCode(e.target.value.toUpperCase())}
-            className="input-text"
-          />
-        </div>
-
-        <div className="form-group">
-          <label>Mã giảm giá (tùy chọn):</label>
-          <input
-            type="text"
-            placeholder="VD: TET2024"
-            value={couponCode}
-            onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-            className="input-text"
-          />
-        </div>
-
-        {calculating && <div className="calculating">Đang tính giá...</div>}
-
-        {priceResult && (
-          <div className="price-breakdown">
-            <h3>Chi tiết giá</h3>
-
-            {priceResult.breakdown.map((item, index) => (
-              <div key={index} className="breakdown-item">
-                <div className="breakdown-step">{item.step}</div>
-                <div className="breakdown-description">{item.description}</div>
-                <div className="breakdown-amount">
-                  {parseFloat(item.amount).toLocaleString('vi-VN')} ₫
-                </div>
-                {item.discountAmount && (
-                  <div className="breakdown-discount">
-                    -{parseFloat(item.discountAmount).toLocaleString('vi-VN')} ₫
-                    ({item.discountPercentage}%)
-                  </div>
-                )}
-              </div>
-            ))}
-
-            <div className="price-summary">
-              <div className="summary-row">
-                <span>Giá gốc:</span>
-                <span>{parseFloat(priceResult.basePrice).toLocaleString('vi-VN')} ₫</span>
-              </div>
-              <div className="summary-row">
-                <span>Tổng giảm:</span>
-                <span className="discount">
-                  -{parseFloat(priceResult.totalDiscount).toLocaleString('vi-VN')} ₫
-                  ({priceResult.discountPercentage}%)
-                </span>
-              </div>
-              <div className="summary-row total">
-                <span>Đơn giá cuối:</span>
-                <span className="final-price">
-                  {parseFloat(priceResult.finalPrice).toLocaleString('vi-VN')} ₫
-                </span>
-              </div>
-              <div className="summary-row grand-total">
-                <span>Tổng thanh toán ({quantity} sản phẩm):</span>
-                <span className="grand-total-price">
-                  {(parseFloat(priceResult.finalPrice) * quantity).toLocaleString('vi-VN')} ₫
-                </span>
-              </div>
-            </div>
-
-            {priceResult.floorEnforced && (
-              <div className="floor-notice">
-                ⚠️ Giá đã được điều chỉnh lên mức tối thiểu: {parseFloat(priceResult.priceFloor!).toLocaleString('vi-VN')} ₫
-              </div>
-            )}
-          </div>
+    <PageContainer className="flex flex-col gap-8">
+      <header className="flex flex-col items-start gap-2">
+        <Chip status={canJoin ? 'online' : 'offline'}>{campaign.status}</Chip>
+        <h1 className="text-3xl font-bold tracking-tight text-white md:text-[38px]">
+          {campaign.name}
+        </h1>
+        {campaign.description && (
+          <p className="max-w-2xl text-sm leading-relaxed text-[#94A3B8]">
+            {campaign.description}
+          </p>
         )}
+      </header>
 
-        {error && <div className="error-message">{error}</div>}
+      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-12 lg:gap-8">
+        <section className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-[#0C101CEE] p-5 lg:col-span-7">
+          <h2 className="font-mono text-xs uppercase tracking-wider text-[#566079]">
+            Gửi mã mời
+          </h2>
 
-        <button
-          onClick={handleJoin}
-          disabled={submitting || !priceResult}
-          className="btn-submit"
-        >
-          {submitting ? 'Đang xử lý...' : 'Xác nhận tham gia'}
-        </button>
+          {submitted && (
+            <p className="rounded-xl border border-[#35FFB133] bg-[#07080D] p-3 text-sm text-[#35FFB1]">
+              Đã nhận yêu cầu. Yêu cầu đang chờ xử lý và chưa trừ ví.
+            </p>
+          )}
+
+          {canJoin ? (
+            <>
+              <SupportCodeInput value={inviteCode} error={codeError} onChange={handleCodeChange} />
+
+              <div className="flex items-center justify-between">
+                <div className="flex flex-col">
+                  <span className="text-sm text-[#DCE4F8]">Số tài khoản hỗ trợ</span>
+                  <span className="text-xs text-[#566079]">
+                    Tối đa {campaign.targetQuantity} tài khoản cho mỗi mã
+                  </span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="font-mono text-base font-bold text-white">{quantity}</span>
+                  <QuantitySelector
+                    value={quantity}
+                    max={campaign.targetQuantity}
+                    onChange={setQuantity}
+                  />
+                </div>
+              </div>
+
+              {price && (
+                <dl className="flex flex-col gap-2 border-t border-white/10 pt-4 text-sm">
+                  <div className="flex justify-between text-[#94A3B8]">
+                    <dt>Đơn giá mỗi tài khoản</dt>
+                    <dd>{formatCurrency(price.finalPrice)}</dd>
+                  </div>
+                  <div className="flex justify-between font-semibold text-white">
+                    <dt>Tối đa phải trả ({quantity} tài khoản)</dt>
+                    <dd>{formatCurrency(Number(price.finalPrice) * quantity)}</dd>
+                  </div>
+                </dl>
+              )}
+
+              <p className="text-xs leading-relaxed text-[#566079]">
+                Gửi yêu cầu chưa trừ ví. Ví chỉ bị trừ theo số tài khoản tiếp sức thành công.
+              </p>
+
+              {submitError && <p className="text-sm text-[#FF5C5C]">{submitError}</p>}
+
+              <Button type="button" onClick={() => void handleSubmit()} disabled={submitting}>
+                {submitting ? 'Đang gửi...' : 'Gửi yêu cầu'}
+              </Button>
+            </>
+          ) : (
+            <p className="text-sm text-[#94A3B8]">Chiến dịch hiện không nhận yêu cầu.</p>
+          )}
+
+          <Link to={APP_CONSTANTS.ROUTES.CHUNG_SUC} className="self-start">
+            <Button type="button" variant="ghost" size="sm">
+              ← Về danh sách chiến dịch
+            </Button>
+          </Link>
+        </section>
+
+        <section className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-[#0C101CEE] p-5 lg:col-span-5">
+          <h2 className="font-mono text-xs uppercase tracking-wider text-[#566079]">
+            Yêu cầu của tôi
+          </h2>
+
+          {requests.length === 0 ? (
+            <p className="text-sm text-[#94A3B8]">Bạn chưa gửi mã mời nào cho chiến dịch này.</p>
+          ) : (
+            <ul className="flex flex-col divide-y divide-white/5">
+              {requests.map((request) => (
+                <li key={request.id} className="flex items-center justify-between gap-3 py-3">
+                  <div className="flex min-w-0 flex-col gap-1">
+                    <span className="truncate font-mono text-sm text-[#DCE4F8]">
+                      {request.inviteCodeMasked}
+                    </span>
+                    <span className="text-xs text-[#566079]">
+                      {request.quantity} tài khoản · {formatDateTime(request.joinedAt)}
+                    </span>
+                  </div>
+                  <div className="flex shrink-0 items-center gap-3">
+                    <span className="font-mono text-[11px] font-bold uppercase text-[#24D7FF]">
+                      {REQUEST_STATUS_LABELS[request.status]}
+                    </span>
+                    {request.status === 'PENDING' && (
+                      <button
+                        type="button"
+                        disabled={cancellingId === request.id}
+                        onClick={() => void handleCancel(request.id)}
+                        className="text-xs font-bold text-[#FF5C5C] hover:underline disabled:opacity-50"
+                      >
+                        Hủy
+                      </button>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
       </div>
-    </div>
+    </PageContainer>
   );
 }

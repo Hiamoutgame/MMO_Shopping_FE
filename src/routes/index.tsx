@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Navigate, Routes, Route } from 'react-router-dom';
 import { APP_CONSTANTS } from '../common/const/app';
 import { MainLayout, AuthLayout, AdminLayout } from '../layouts';
 import { RequireAuth } from '../components/RequireAuth/RequireAuth';
@@ -10,7 +10,6 @@ import {
   ProductsPage,
   ProductDetailPage,
   CartPage,
-  SupportPage,
   PolicyPage,
   ContactPage,
   LoginPage,
@@ -30,6 +29,9 @@ import {
   CashbackOrdersPage,
   CashbackWithdrawalsPage,
   CashbackReferralsPage,
+  ChungSucCampaignsPage,
+  JoinChungSucPage,
+  AdminChungSucPage,
 } from './lazyComponents';
 
 function LoadingFallback() {
@@ -59,9 +61,11 @@ export function AppRouter() {
           <Route path={APP_CONSTANTS.ROUTES.PRODUCTS} element={<MainLayout pageTitle="SẢN PHẨM"><ProductsPage /></MainLayout>} />
           <Route path={APP_CONSTANTS.ROUTES.PRODUCT_DETAIL} element={<MainLayout pageTitle="CHI TIẾT"><ProductDetailPage /></MainLayout>} />
           <Route path={APP_CONSTANTS.ROUTES.CART} element={<MainLayout pageTitle="GIỎ HÀNG"><RequireAuth><CartPage /></RequireAuth></MainLayout>} />
-          <Route path={APP_CONSTANTS.ROUTES.SUPPORT} element={<MainLayout pageTitle="TIẾP SỨC"><RequireAuth><SupportPage /></RequireAuth></MainLayout>} />
+          <Route path={APP_CONSTANTS.ROUTES.SUPPORT} element={<Navigate to={APP_CONSTANTS.ROUTES.CHUNG_SUC} replace />} />
           <Route path={APP_CONSTANTS.ROUTES.POLICY} element={<MainLayout pageTitle="CHÍNH SÁCH"><PolicyPage /></MainLayout>} />
           <Route path={APP_CONSTANTS.ROUTES.CONTACT} element={<MainLayout pageTitle="LIÊN HỆ"><ContactPage /></MainLayout>} />
+          <Route path={APP_CONSTANTS.ROUTES.CHUNG_SUC} element={<MainLayout pageTitle="CHUNG SỨC"><ChungSucCampaignsPage /></MainLayout>} />
+          <Route path={APP_CONSTANTS.ROUTES.CHUNG_SUC_JOIN} element={<MainLayout pageTitle="CHUNG SỨC"><RequireAuth><JoinChungSucPage /></RequireAuth></MainLayout>} />
           <Route path={APP_CONSTANTS.ROUTES.CASHBACK} element={<MainLayout pageTitle="HOÀN PHÍ"><RequireAuth><CashbackCenterPage /></RequireAuth></MainLayout>}>
             <Route index element={<CashbackLinkPage />} />
             <Route path="wallet" element={<CashbackWalletPage />} />
@@ -82,6 +86,7 @@ export function AppRouter() {
           <Route path="/admin/inventory" element={<RequireAdmin><AdminLayout><AdminInventoryPage /></AdminLayout></RequireAdmin>} />
           <Route path="/admin/orders" element={<RequireAdmin><AdminLayout><AdminOrdersPage /></AdminLayout></RequireAdmin>} />
           <Route path="/admin/vouchers" element={<RequireAdmin><AdminLayout><AdminVouchersPage /></AdminLayout></RequireAdmin>} />
+          <Route path="/admin/chung-suc" element={<RequireAdmin><AdminLayout><AdminChungSucPage /></AdminLayout></RequireAdmin>} />
           <Route path="/admin/finance" element={<RequireAdmin><AdminLayout><AdminFinancePage /></AdminLayout></RequireAdmin>} />
           <Route path="/admin/audit-logs" element={<RequireAdmin><AdminLayout><AdminAuditLogsPage /></AdminLayout></RequireAdmin>} />
 

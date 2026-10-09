@@ -20,7 +20,6 @@ export interface ChungSucCampaign {
   description: string;
   imageUrl?: string;
   targetQuantity: number;
-  currentQuantity: number;
   startTime: string;
   endTime: string;
   status: 'DRAFT' | 'UPCOMING' | 'ACTIVE' | 'PAUSED' | 'COMPLETED' | 'ENDED' | 'CLOSED';

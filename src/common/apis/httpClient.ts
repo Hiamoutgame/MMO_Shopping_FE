@@ -57,9 +57,17 @@ function toApiError(error: unknown): ApiError {
     };
   }
 
+  // Một số module BE trả lỗi dạng Nest mặc định ({ statusCode, message }) thay vì envelope.
+  const rawMessage = (body as { message?: unknown } | undefined)?.message;
+  const serverMessage = Array.isArray(rawMessage)
+    ? rawMessage.join('; ')
+    : typeof rawMessage === 'string'
+      ? rawMessage
+      : '';
+
   return {
     status,
-    message: axiosError.message || 'Yêu cầu thất bại.',
+    message: serverMessage || axiosError.message || 'Yêu cầu thất bại.',
     errorCode: null,
   };
 }

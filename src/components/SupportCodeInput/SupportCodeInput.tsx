@@ -20,7 +20,7 @@ export function SupportCodeInput({ value, error, onChange }: SupportCodeInputPro
           className="w-full resize-none border-none bg-transparent font-mono text-base tracking-[1.1px] text-[#F2F4FF] outline-none placeholder:text-[#64748B]"
         />
         <span id="support-code-help" className="text-[13px] leading-[1.45] text-[#566079]">
-          Dán mã vào đây. Hệ thống sẽ kiểm tra hiệu lực trước khi chuyển sang thanh toán.
+          Dán mã mời trong game vào đây. Mã được kiểm tra hiệu lực trước khi tiếp sức.
         </span>
       </div>
       {error && <span id="support-code-error" className="text-xs text-[#FF5C5C]" role="alert">{error}</span>}

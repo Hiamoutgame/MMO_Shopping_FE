@@ -12,6 +12,8 @@ export const APP_CONSTANTS = {
     CART: '/cart',
     SUPPORT: '/support',
     CASHBACK: '/cashback',
+    CHUNG_SUC: '/chung-suc',
+    CHUNG_SUC_JOIN: '/chung-suc/:campaignId/join',
     POLICY: '/policy',
     CONTACT: '/contact',
     LOGIN: '/login',

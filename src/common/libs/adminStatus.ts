@@ -52,6 +52,24 @@ export function accountStatusTone(status: string): StatusTone {
   }
 }
 
+export function campaignStatusTone(status: string): StatusTone {
+  switch (status) {
+    case 'ACTIVE':
+      return 'green';
+    case 'UPCOMING':
+    case 'COMPLETED':
+      return 'blue';
+    case 'PAUSED':
+      return 'amber';
+    case 'ENDED':
+      return 'red';
+    case 'CLOSED':
+      return 'violet';
+    default:
+      return 'gray';
+  }
+}
+
 export function booleanTone(value: boolean): StatusTone {
   return value ? 'green' : 'gray';
 }

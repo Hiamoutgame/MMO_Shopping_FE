@@ -100,11 +100,13 @@ PATCH /api/seasons/:id (ADMIN)
 DELETE /api/seasons/:id (ADMIN)
 
 // CHUNG SỨC
-GET /api/chung-suc/campaigns
-GET /api/chung-suc/campaigns/:id
-POST /api/chung-suc/campaigns (ADMIN)
-PATCH /api/chung-suc/campaigns/:id (ADMIN)
-POST /api/chung-suc/campaigns/:id/join
+GET /api/v1/campaigns
+GET /api/v1/campaigns/active
+GET /api/v1/campaigns/:id
+POST /api/v1/campaigns (ADMIN)
+PATCH /api/v1/campaigns/:id (ADMIN)
+POST /api/v1/campaigns/:id/{activate|pause|end|close} (ADMIN)
+POST /api/v1/campaigns/:id/join
 
 // Pricing
 POST /api/pricing/calculate

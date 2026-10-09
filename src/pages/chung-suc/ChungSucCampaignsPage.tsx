@@ -1,163 +1,141 @@
-import { useState, useEffect } from 'react';
-import { chungSucAPI } from '../../services/api.ts';
-import type { ChungSucCampaign } from '../../types/chung-suc.types.ts';
+import { useEffect, useState } from 'react';
+import { Link, generatePath } from 'react-router-dom';
+import { chungSucApi } from '../../common/apis/chungSucApi';
+import type { CampaignDto } from '../../common/models/chungSuc';
+import type { ApiError } from '../../common/models/common';
+import { APP_CONSTANTS } from '../../common/const/app';
+import { formatDate } from '../../common/libs/formatter';
+import { Button } from '../../components/Button/Button';
+import { Chip } from '../../components/Chip/Chip';
+import { EmptyState } from '../../components/EmptyState/EmptyState';
+import { PageContainer } from '../../components/PageContainer/PageContainer';
 
-interface CampaignCardProps {
-  campaign: ChungSucCampaign;
-  onJoin?: (campaignId: string) => void;
-}
-
-export function CampaignCard({ campaign, onJoin }: CampaignCardProps) {
-  const progress = (campaign.currentQuantity / campaign.targetQuantity) * 100;
-  const remaining = campaign.targetQuantity - campaign.currentQuantity;
-  const isCompleted = campaign.currentQuantity >= campaign.targetQuantity;
-  const isActive = campaign.status === 'ACTIVE';
-
-  const statusColor = {
-    ACTIVE: 'bg-emerald-500',
-    COMPLETED: 'bg-blue-500',
-    ENDED: 'bg-gray-500',
-    PAUSED: 'bg-amber-500',
-  }[campaign.status] || 'bg-gray-400';
+function CampaignCard({ campaign }: { campaign: CampaignDto }) {
+  const rewards = Object.entries(campaign.rewards ?? {});
 
   return (
-    <div className="campaign-card">
+    <article className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-[#0C101CEE] p-5 shadow-[0_14px_28px_rgba(0,0,0,0.35)]">
       {campaign.imageUrl && (
-        <img src={campaign.imageUrl} alt={campaign.name} className="campaign-image" />
+        <img
+          src={campaign.imageUrl}
+          alt={campaign.name}
+          className="h-40 w-full rounded-xl object-cover"
+        />
       )}
 
-      <div className="campaign-header">
-        <h3>{campaign.name}</h3>
-        <span className={`status-badge ${statusColor}`}>
-          {campaign.status}
-        </span>
+      <div className="flex flex-col gap-1">
+        <h2 className="text-lg font-bold text-white">{campaign.name}</h2>
+        {campaign.product && (
+          <span className="text-xs text-[#566079]">Sản phẩm: {campaign.product.name}</span>
+        )}
+        {campaign.description && (
+          <p className="text-sm leading-relaxed text-[#94A3B8]">{campaign.description}</p>
+        )}
       </div>
 
-      <p className="campaign-description">{campaign.description}</p>
+      <dl className="grid grid-cols-2 gap-3 text-sm">
+        <div>
+          <dt className="text-xs text-[#566079]">Tối đa mỗi mã</dt>
+          <dd className="font-semibold text-white">{campaign.targetQuantity} tài khoản</dd>
+        </div>
+        <div>
+          <dt className="text-xs text-[#566079]">Kết thúc</dt>
+          <dd className="font-semibold text-white">{formatDate(campaign.endTime)}</dd>
+        </div>
+      </dl>
 
-      <div className="campaign-progress">
-        <div className="progress-bar-container">
-          <div
-            className="progress-bar-fill"
-            style={{ width: `${Math.min(progress, 100)}%` }}
-          />
-        </div>
-        <div className="progress-stats">
-          <span>{campaign.currentQuantity} / {campaign.targetQuantity}</span>
-          <span>{progress.toFixed(1)}%</span>
-        </div>
-      </div>
-
-      <div className="campaign-info">
-        <div className="info-item">
-          <span className="label">Còn lại:</span>
-          <span className="value">{remaining > 0 ? remaining : 0} sản phẩm</span>
-        </div>
-        <div className="info-item">
-          <span className="label">Kết thúc:</span>
-          <span className="value">
-            {new Date(campaign.endTime).toLocaleDateString('vi-VN')}
-          </span>
-        </div>
-      </div>
-
-      {campaign.rewards && Object.keys(campaign.rewards).length > 0 && (
-        <div className="campaign-rewards">
-          <h4>🎁 Phần thưởng:</h4>
-          <ul>
-            {Object.entries(campaign.rewards).map(([key, value]) => (
-              <li key={key}>{value as string}</li>
+      {rewards.length > 0 && (
+        <div className="rounded-xl border border-white/10 bg-[#07080D] p-3">
+          <h3 className="font-mono text-[10px] font-extrabold uppercase tracking-[1.3px] text-[#566079]">
+            Phần thưởng
+          </h3>
+          <ul className="mt-2 flex flex-col gap-1 text-sm text-[#DCE4F8]">
+            {rewards.map(([key, value]) => (
+              <li key={key}>{String(value)}</li>
             ))}
           </ul>
         </div>
       )}
 
-      {isActive && !isCompleted && onJoin && (
-        <button
-          className="btn-join-campaign"
-          onClick={() => onJoin(campaign.id)}
-        >
-          Tham gia ngay
-        </button>
-      )}
-
-      {isCompleted && (
-        <div className="campaign-completed">
-          ✅ Đã đạt mục tiêu!
-        </div>
-      )}
-    </div>
+      <Link
+        className="mt-auto"
+        to={generatePath(APP_CONSTANTS.ROUTES.CHUNG_SUC_JOIN, { campaignId: campaign.id })}
+      >
+        <Button type="button" className="w-full">
+          Gửi mã mời
+        </Button>
+      </Link>
+    </article>
   );
 }
 
-export function ChungSucCampaignsPage() {
-  const [campaigns, setCampaigns] = useState<ChungSucCampaign[]>([]);
+export default function ChungSucCampaignsPage() {
+  const [campaigns, setCampaigns] = useState<CampaignDto[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
-    loadCampaigns();
-  }, []);
+    let cancelled = false;
+    chungSucApi
+      .activeCampaigns()
+      .then((items) => {
+        if (!cancelled) {
+          setCampaigns(items);
+          setError(null);
+        }
+      })
+      .catch((err: unknown) => {
+        if (!cancelled) {
+          setError((err as ApiError).message || 'Không thể tải danh sách chiến dịch.');
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [reloadKey]);
 
-  const loadCampaigns = async () => {
-    try {
-      setLoading(true);
-      const response = await chungSucAPI.getActiveCampaigns();
-      setCampaigns(response.data);
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Không thể tải danh sách chiến dịch');
-    } finally {
-      setLoading(false);
-    }
+  const retry = () => {
+    setLoading(true);
+    setError(null);
+    setReloadKey((key) => key + 1);
   };
-
-  const handleJoinCampaign = (campaignId: string) => {
-    // Redirect to join page with campaign ID
-    window.location.href = `/chung-suc/${campaignId}/join`;
-  };
-
-  if (loading) {
-    return (
-      <div className="loading-container">
-        <div className="spinner" />
-        <p>Đang tải chiến dịch...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="error-container">
-        <p className="error-message">{error}</p>
-        <button onClick={loadCampaigns}>Thử lại</button>
-      </div>
-    );
-  }
 
   return (
-    <div className="chung-suc-page">
-      <header className="page-header">
-        <h1>🎯 CHUNG SỨC - Mua Chung Giá Tốt</h1>
-        <p className="page-subtitle">
-          Cùng nhau mua số lượng lớn để được giá cực ưu đãi
+    <PageContainer className="flex flex-col gap-8 sm:gap-10">
+      <header className="flex flex-col items-start gap-2">
+        <Chip status="online">Tiếp sức</Chip>
+        <h1 className="text-3xl font-bold tracking-tight text-white md:text-[38px]">Chung Sức</h1>
+        <p className="max-w-2xl text-sm leading-relaxed text-[#94A3B8]">
+          Gửi mã mời của bạn, chọn số tài khoản hỗ trợ và để chúng tôi giúp bạn đủ lượt mời.
         </p>
       </header>
 
-      {campaigns.length === 0 ? (
-        <div className="empty-state">
-          <p>Chưa có chiến dịch nào đang hoạt động</p>
+      {loading ? (
+        <p className="text-sm text-[#94A3B8]">Đang tải chiến dịch...</p>
+      ) : error ? (
+        <div className="flex flex-col items-start gap-3 rounded-2xl border border-[#FF5C5C33] bg-[#0C101CEE] p-5">
+          <p className="text-sm text-[#FF5C5C]">{error}</p>
+          <Button type="button" variant="secondary" size="sm" onClick={retry}>
+            Thử lại
+          </Button>
         </div>
+      ) : campaigns.length === 0 ? (
+        <EmptyState
+          icon={<span className="text-xl">◎</span>}
+          title="Chưa có chiến dịch đang chạy"
+          description="Các chiến dịch tiếp sức sẽ xuất hiện ở đây khi được mở."
+        />
       ) : (
-        <div className="campaigns-grid">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
           {campaigns.map((campaign) => (
-            <CampaignCard
-              key={campaign.id}
-              campaign={campaign}
-              onJoin={handleJoinCampaign}
-            />
+            <CampaignCard key={campaign.id} campaign={campaign} />
           ))}
         </div>
       )}
-    </div>
+    </PageContainer>
   );
 }
