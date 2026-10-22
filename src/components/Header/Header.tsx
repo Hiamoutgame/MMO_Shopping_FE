@@ -20,6 +20,7 @@ export function Header() {
   const navLinks = [
     { label: 'Sản phẩm', path: APP_CONSTANTS.ROUTES.PRODUCTS },
     { label: 'Giỏ hàng', path: APP_CONSTANTS.ROUTES.CART },
+    ...(isAuthenticated ? [{ label: 'Ví', path: APP_CONSTANTS.ROUTES.WALLET }] : []),
     { label: 'Chung sức', path: APP_CONSTANTS.ROUTES.CHUNG_SUC },
     { label: 'Chính sách', path: APP_CONSTANTS.ROUTES.POLICY },
     { label: 'Liên hệ', path: APP_CONSTANTS.ROUTES.CONTACT },

@@ -18,6 +18,11 @@ import type {
   AdminVoucherDto,
   AdminWalletLedgerDto,
   AdminWalletLedgerQuery,
+  AdminPaymentEventDto,
+  AdminPaymentEventQuery,
+  ResolvePaymentEventRequest,
+  SepaySyncResult,
+  WalletReconciliationReport,
   AuditLogDto,
   AuditLogQuery,
   CreateAccountRequest,
@@ -296,5 +301,33 @@ export const adminFinanceApi = {
       API_PATHS.ADMIN.WALLET_LEDGERS,
       { params: toParams(query) },
     );
+  },
+
+  paymentEvents(query: AdminPaymentEventQuery = {}): Promise<PaginatedResponse<AdminPaymentEventDto>> {
+    return httpClient.get<PaginatedResponse<AdminPaymentEventDto>>(API_PATHS.ADMIN.PAYMENT_EVENTS, {
+      params: toParams(query),
+    });
+  },
+
+  paymentEvent(id: string): Promise<{ event: AdminPaymentEventDto }> {
+    return httpClient.get<{ event: AdminPaymentEventDto }>(API_PATHS.ADMIN.PAYMENT_EVENT_DETAIL(id));
+  },
+
+  resolvePaymentEvent(
+    id: string,
+    payload: ResolvePaymentEventRequest,
+  ): Promise<{ event: AdminPaymentEventDto }> {
+    return httpClient.post<{ event: AdminPaymentEventDto }>(
+      API_PATHS.ADMIN.PAYMENT_EVENT_RESOLVE(id),
+      payload,
+    );
+  },
+
+  syncSepay(sinceHours = 24): Promise<SepaySyncResult> {
+    return httpClient.post<SepaySyncResult>(API_PATHS.ADMIN.SEPAY_SYNC, { sinceHours });
+  },
+
+  reconciliation(): Promise<WalletReconciliationReport> {
+    return httpClient.get<WalletReconciliationReport>(API_PATHS.ADMIN.WALLET_RECONCILIATION);
   },
 };

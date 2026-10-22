@@ -10,6 +10,7 @@ export const APP_CONSTANTS = {
     PRODUCTS: '/products',
     PRODUCT_DETAIL: '/products/:id',
     CART: '/cart',
+    WALLET: '/wallet',
     SUPPORT: '/support',
     CASHBACK: '/cashback',
     CHUNG_SUC: '/chung-suc',

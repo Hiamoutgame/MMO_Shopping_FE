@@ -10,6 +10,7 @@ import {
   ProductsPage,
   ProductDetailPage,
   CartPage,
+  WalletPage,
   PolicyPage,
   ContactPage,
   LoginPage,
@@ -61,6 +62,7 @@ export function AppRouter() {
           <Route path={APP_CONSTANTS.ROUTES.PRODUCTS} element={<MainLayout pageTitle="SẢN PHẨM"><ProductsPage /></MainLayout>} />
           <Route path={APP_CONSTANTS.ROUTES.PRODUCT_DETAIL} element={<MainLayout pageTitle="CHI TIẾT"><ProductDetailPage /></MainLayout>} />
           <Route path={APP_CONSTANTS.ROUTES.CART} element={<MainLayout pageTitle="GIỎ HÀNG"><RequireAuth><CartPage /></RequireAuth></MainLayout>} />
+          <Route path={APP_CONSTANTS.ROUTES.WALLET} element={<MainLayout pageTitle="VÍ CỦA TÔI"><RequireAuth><WalletPage /></RequireAuth></MainLayout>} />
           <Route path={APP_CONSTANTS.ROUTES.SUPPORT} element={<Navigate to={APP_CONSTANTS.ROUTES.CHUNG_SUC} replace />} />
           <Route path={APP_CONSTANTS.ROUTES.POLICY} element={<MainLayout pageTitle="CHÍNH SÁCH"><PolicyPage /></MainLayout>} />
           <Route path={APP_CONSTANTS.ROUTES.CONTACT} element={<MainLayout pageTitle="LIÊN HỆ"><ContactPage /></MainLayout>} />

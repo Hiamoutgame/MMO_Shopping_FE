@@ -41,6 +41,13 @@ export const API_PATHS = {
     LIFECYCLE: (id: string, action: 'activate' | 'pause' | 'end' | 'close') =>
       `/campaigns/${id}/${action}`,
   },
+  WALLET: {
+    GET: '/wallet',
+    TRANSACTIONS: '/wallet-transactions',
+    DEPOSITS: '/deposits',
+    DEPOSIT_CONFIG: '/deposits/config',
+    DEPOSIT_DETAIL: (id: string) => `/deposits/${id}`,
+  },
   SEASONS: {
     LIST: '/seasons',
   },
@@ -91,5 +98,10 @@ export const API_PATHS = {
     PAYMENT_TRANSACTIONS: '/admin/payment-transactions',
     PAYMENT_TRANSACTION_DETAIL: (id: string) => `/admin/payment-transactions/${id}`,
     WALLET_LEDGERS: '/admin/wallet-ledgers',
+    PAYMENT_EVENTS: '/admin/payment-webhook-events',
+    PAYMENT_EVENT_DETAIL: (id: string) => `/admin/payment-webhook-events/${id}`,
+    PAYMENT_EVENT_RESOLVE: (id: string) => `/admin/payment-webhook-events/${id}/resolve`,
+    SEPAY_SYNC: '/admin/payments/sepay/sync',
+    WALLET_RECONCILIATION: '/admin/wallets/reconciliation',
   },
 } as const;

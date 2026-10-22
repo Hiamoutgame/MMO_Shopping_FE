@@ -410,6 +410,77 @@ export interface AdminWalletLedgerQuery extends AdminPagedQuery {
   accountId?: string;
 }
 
+export type PaymentEventStatus =
+  | 'RECEIVED'
+  | 'PROCESSED'
+  | 'IGNORED'
+  | 'NEEDS_REVIEW'
+  | 'RESOLVED';
+
+export interface AdminPaymentEventDto {
+  id: string;
+  provider: string;
+  providerEventId: string;
+  source: 'WEBHOOK' | 'SYNC';
+  status: PaymentEventStatus;
+  reason: string | null;
+  note: string | null;
+  transferType: string;
+  amount: Money;
+  paymentCode: string | null;
+  content: string | null;
+  referenceCode: string | null;
+  accountNumber: string | null;
+  transactionDate: string | null;
+  deliveryCount: number;
+  paymentTransactionId: string | null;
+  walletTransactionId: string | null;
+  resolvedBy: string | null;
+  processedAt: string | null;
+  lastReceivedAt: string;
+  createdAt: string;
+  rawPayload?: Record<string, unknown>;
+}
+
+export interface AdminPaymentEventQuery extends AdminPagedQuery {
+  status?: PaymentEventStatus;
+  search?: string;
+}
+
+export interface ResolvePaymentEventRequest {
+  action: 'CREDIT' | 'IGNORE';
+  accountId?: string;
+  note: string;
+}
+
+export interface SepaySyncResult {
+  fetched: number;
+  candidates: number;
+  newlyProcessed: number;
+  needsReview: number;
+  alreadyRecorded: number;
+}
+
+export interface WalletReconciliationReport {
+  checkedAt: string;
+  ok: boolean;
+  walletsChecked: number;
+  totalBalance: Money;
+  eventsNeedingReview: number;
+  walletMismatches: Array<{
+    walletId: string;
+    accountId: string;
+    email: string | null;
+    balance: Money;
+    ledgerNet: Money;
+    entries: number;
+    brokenLinks: number;
+  }>;
+  paymentIssues: Array<Record<string, unknown>>;
+  orphanLedgers: Array<Record<string, unknown>>;
+  eventsWithoutLedger: Array<Record<string, unknown>>;
+}
+
 // ---------------------------------------------------------------------------
 // Pagination aliases for readability in pages
 // ---------------------------------------------------------------------------
