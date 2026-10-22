@@ -31,6 +31,7 @@ export const API_PATHS = {
   CAMPAIGNS: {
     LIST: '/campaigns',
     ACTIVE: '/campaigns/active',
+    VARIANTS: '/campaigns/variants',
     DETAIL: (id: string) => `/campaigns/${id}`,
     JOIN: (id: string) => `/campaigns/${id}/join`,
     PROGRESS: (id: string) => `/campaigns/${id}/progress`,
@@ -39,6 +40,7 @@ export const API_PATHS = {
     CANCEL_REQUEST: (requestId: string) => `/campaigns/requests/${requestId}/cancel`,
     LIFECYCLE: (id: string, action: 'activate' | 'pause' | 'end' | 'close') =>
       `/campaigns/${id}/${action}`,
+    TOGGLE: (id: string) => `/campaigns/${id}/toggle`,
   },
   SEASONS: {
     LIST: '/seasons',

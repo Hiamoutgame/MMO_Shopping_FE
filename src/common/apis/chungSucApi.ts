@@ -6,6 +6,7 @@ import type {
   CampaignLifecycleAction,
   CampaignParticipantDto,
   CreateCampaignRequest,
+  EventVariantPresetDto,
   JoinCampaignRequest,
   MyRequestDto,
   PriceCalculationDto,
@@ -16,6 +17,10 @@ import type {
 export const chungSucApi = {
   activeCampaigns(): Promise<CampaignDto[]> {
     return httpClient.get<CampaignDto[]>(API_PATHS.CAMPAIGNS.ACTIVE);
+  },
+
+  variantPresets(): Promise<EventVariantPresetDto[]> {
+    return httpClient.get<EventVariantPresetDto[]>(API_PATHS.CAMPAIGNS.VARIANTS);
   },
 
   campaign(id: string): Promise<CampaignDto> {
@@ -58,6 +63,11 @@ export const adminChungSucApi = {
 
   runLifecycle(id: string, action: CampaignLifecycleAction): Promise<CampaignDto> {
     return httpClient.post<CampaignDto>(API_PATHS.CAMPAIGNS.LIFECYCLE(id, action));
+  },
+
+  // Đang chạy thì tạm dừng, ngược lại kích hoạt.
+  toggleCampaign(id: string): Promise<CampaignDto> {
+    return httpClient.post<CampaignDto>(API_PATHS.CAMPAIGNS.TOGGLE(id));
   },
 
   deleteCampaign(id: string): Promise<{ id: string }> {

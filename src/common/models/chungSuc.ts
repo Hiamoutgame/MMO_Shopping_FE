@@ -11,6 +11,27 @@ export type CampaignStatus =
 
 export type CampaignLifecycleAction = 'activate' | 'pause' | 'end' | 'close';
 
+export type EventVariant = 'XAP_XINH' | 'DOT_PHAO' | 'TINH_HOA' | 'BAN_BI' | 'CUSTOM';
+
+// Luật sự kiện. null = không giới hạn.
+export interface EventRules {
+  // Số lượt một tài khoản hỗ trợ đi giúp được.
+  helperLimitPerDay: number | null;
+  helperLimitTotal: number | null;
+  // Số lượt một mã mời nhận được.
+  ownerLimitPerDay: number | null;
+  ownerLimitTotal: number | null;
+  pointsCap: number | null;
+  // Giới hạn "theo ngày" reset lúc 00:00 giờ Việt Nam.
+  dailyReset: boolean;
+}
+
+export interface EventVariantPresetDto extends EventRules {
+  variant: EventVariant;
+  label: string;
+  description: string;
+}
+
 export interface SeasonDto {
   id: string;
   name: string;
@@ -25,7 +46,7 @@ export interface CampaignProductDto {
   basePrice: Money | null;
 }
 
-export interface CampaignDto {
+export interface CampaignDto extends EventRules {
   id: string;
   seasonId: string | null;
   productId: string;
@@ -38,6 +59,8 @@ export interface CampaignDto {
   startTime: string;
   endTime: string;
   status: CampaignStatus;
+  eventCode: string | null;
+  variant: EventVariant;
   rewards: Record<string, unknown> | null;
   createdAt: string;
   updatedAt: string;
@@ -77,7 +100,7 @@ export interface JoinCampaignRequest {
   quantity: number;
 }
 
-export interface CreateCampaignRequest {
+export interface CreateCampaignRequest extends Partial<EventRules> {
   productId: string;
   seasonId?: string;
   name: string;
@@ -88,6 +111,8 @@ export interface CreateCampaignRequest {
   startTime: string;
   endTime: string;
   rewards?: Record<string, unknown>;
+  eventCode?: string | null;
+  variant?: EventVariant;
 }
 
 // BE không cho sửa productId/seasonId/slug/status qua PATCH.

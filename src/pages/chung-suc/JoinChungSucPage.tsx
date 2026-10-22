@@ -11,6 +11,7 @@ import type {
 import type { ApiError } from '../../common/models/common';
 import { APP_CONSTANTS } from '../../common/const/app';
 import { formatCurrency, formatDateTime } from '../../common/libs/formatter';
+import { EVENT_VARIANT_LABELS, describeEventRules } from '../../common/libs/eventRules';
 import { Button } from '../../components/Button/Button';
 import { Chip } from '../../components/Chip/Chip';
 import { PageContainer } from '../../components/PageContainer/PageContainer';
@@ -124,6 +125,10 @@ export default function JoinChungSucPage() {
   }
 
   const canJoin = campaign.status === 'ACTIVE';
+  // Khách chỉ cần biết luật của mã mời, không cần luật của tài khoản hỗ trợ.
+  const customerRules = describeEventRules(campaign).filter(
+    (item) => item.label !== 'Mỗi tài khoản hỗ trợ giúp',
+  );
 
   const handleCodeChange = (value: string) => {
     setInviteCode(value);
@@ -182,6 +187,21 @@ export default function JoinChungSucPage() {
             {campaign.description}
           </p>
         )}
+        <dl className="mt-2 flex flex-wrap gap-2 text-xs">
+          <div className="rounded-lg border border-white/10 bg-[#07080D] px-3 py-1.5">
+            <dt className="inline text-[#566079]">Sự kiện: </dt>
+            <dd className="inline text-[#DCE4F8]">{EVENT_VARIANT_LABELS[campaign.variant]}</dd>
+          </div>
+          {customerRules.map((item) => (
+            <div
+              key={item.label}
+              className="rounded-lg border border-white/10 bg-[#07080D] px-3 py-1.5"
+            >
+              <dt className="inline text-[#566079]">{item.label}: </dt>
+              <dd className="inline text-[#DCE4F8]">{item.value}</dd>
+            </div>
+          ))}
+        </dl>
       </header>
 
       <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-12 lg:gap-8">
@@ -204,7 +224,7 @@ export default function JoinChungSucPage() {
                 <div className="flex flex-col">
                   <span className="text-sm text-[#DCE4F8]">Số tài khoản hỗ trợ</span>
                   <span className="text-xs text-[#566079]">
-                    Tối đa {campaign.targetQuantity} tài khoản cho mỗi mã
+                    Tối đa {campaign.targetQuantity} tài khoản cho mỗi lần gửi
                   </span>
                 </div>
                 <div className="flex items-center gap-3">
