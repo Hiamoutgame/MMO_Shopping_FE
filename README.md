@@ -2,6 +2,8 @@
 
 React + TypeScript frontend cho hệ thống CHUNG SỨC.
 
+> **Role hỗ trợ: `USER` (khách) và `ADMIN` (chủ shop).** Role seller đã ngừng từ 23/10/2026; trang/API seller đã gỡ khỏi frontend. Xem `docs/changes/seller-role-disabled-2026-10-23.md` trong repo backend.
+
 ## 🚀 Quick Start
 
 ### 1. Cài đặt dependencies
@@ -37,8 +39,6 @@ src/
 │   │   └── PackagesPage.tsx       # Danh sách gói
 │   ├── seasons/
 │   │   └── SeasonsPage.tsx        # Danh sách seasons
-│   ├── seller/
-│   │   └── SellerDashboardPage.tsx  # Dashboard seller
 │   └── admin/
 │       └── AdminChungSucPages.tsx   # Quản lý admin
 ├── services/
@@ -61,11 +61,6 @@ src/
 - ✅ Danh sách gói theo role
 - ✅ Danh sách seasons
 
-### Seller Dashboard
-- ✅ Xem thống kê doanh số
-- ✅ Quản lý mã giới thiệu
-- ✅ Xem hoa hồng
-
 ### Admin Panel
 - ✅ Quản lý seasons (CRUD + lifecycle)
 - ✅ Quản lý chiến dịch CHUNG SỨC
@@ -75,7 +70,6 @@ src/
 
 ```
 USER:   user@mmo.vn / password123
-SELLER: seller@mmo.vn / password123
 ADMIN:  admin@mmo.vn / password123
 ```
 
@@ -102,7 +96,6 @@ npm run preview
 /chung-suc/:id/join        → Tham gia chiến dịch
 /packages                  → Danh sách gói
 /seasons                   → Danh sách seasons
-/seller/dashboard          → Dashboard seller (SELLER/ADMIN only)
 /admin/seasons             → Quản lý seasons (ADMIN only)
 /admin/campaigns           → Quản lý campaigns (ADMIN only)
 ```
@@ -116,7 +109,7 @@ npm run preview
 
 ## 💰 Price Calculation Flow
 
-1. User nhập số lượng, mã seller, mã coupon
+1. User nhập số lượng, mã coupon (account lấy từ phiên đăng nhập ở backend)
 2. Frontend gọi `POST /api/pricing/calculate` với tất cả params
 3. Backend tính giá qua price engine (KHÔNG tin frontend)
 4. Response trả về breakdown chi tiết từng bước giảm giá

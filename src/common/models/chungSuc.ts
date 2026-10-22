@@ -114,12 +114,11 @@ export type UpdateCampaignRequest = Partial<
   Omit<CreateCampaignRequest, 'productId' | 'seasonId' | 'slug'>
 >;
 
+// Account lấy từ phiên đăng nhập ở BE; không gửi accountId.
 export interface CalculatePriceRequest {
   productId: string;
-  accountId: string;
   quantity: number;
   seasonId?: string;
-  sellerCode?: string;
   couponCode?: string;
 }
 

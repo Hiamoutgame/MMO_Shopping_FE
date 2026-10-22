@@ -36,14 +36,17 @@ apiClient.interceptors.response.use(
 
 export default apiClient;
 
+// Payload ghi gửi thẳng lên BE; BE validate bằng DTO.
+type Payload = Record<string, unknown>;
+
 // API Services
 export const seasonsAPI = {
   getAll: () => apiClient.get('/seasons'),
   getActive: () => apiClient.get('/seasons/active'),
   getById: (id: string) => apiClient.get(`/seasons/${id}`),
   getBySlug: (slug: string) => apiClient.get(`/seasons/slug/${slug}`),
-  create: (data: any) => apiClient.post('/seasons', data),
-  update: (id: string, data: any) => apiClient.put(`/seasons/${id}`, data),
+  create: (data: Payload) => apiClient.post('/seasons', data),
+  update: (id: string, data: Payload) => apiClient.put(`/seasons/${id}`, data),
   activate: (id: string) => apiClient.put(`/seasons/${id}/activate`),
   pause: (id: string) => apiClient.put(`/seasons/${id}/pause`),
   end: (id: string) => apiClient.put(`/seasons/${id}/end`),
@@ -53,11 +56,9 @@ export const seasonsAPI = {
 export const pricingAPI = {
   calculate: (data: {
     productId: string;
-    accountId: string;
     quantity: number;
     seasonId?: string;
     packageId?: string;
-    sellerCode?: string;
     couponCode?: string;
   }) => apiClient.post('/pricing/calculate', data),
 };
@@ -67,22 +68,9 @@ export const packagesAPI = {
   getBySeason: (seasonId: string) =>
     apiClient.get(`/packages/season/${seasonId}`),
   getById: (id: string) => apiClient.get(`/packages/${id}`),
-  create: (data: any) => apiClient.post('/packages', data),
-  update: (id: string, data: any) => apiClient.put(`/packages/${id}`, data),
+  create: (data: Payload) => apiClient.post('/packages', data),
+  update: (id: string, data: Payload) => apiClient.put(`/packages/${id}`, data),
   delete: (id: string) => apiClient.delete(`/packages/${id}`),
-};
-
-export const sellersAPI = {
-  getProfile: (accountId: string) => apiClient.get(`/sellers/profile/${accountId}`),
-  createProfile: (data: any) => apiClient.post('/sellers/profile', data),
-  updateProfile: (accountId: string, data: any) =>
-    apiClient.put(`/sellers/profile/${accountId}`, data),
-  approveProfile: (id: string) => apiClient.put(`/sellers/${id}/approve`),
-  rejectProfile: (id: string) => apiClient.put(`/sellers/${id}/reject`),
-  generateReferralCode: (sellerId: string) =>
-    apiClient.post('/sellers/referral-codes', { sellerId }),
-  trackClick: (data: any) => apiClient.post('/sellers/track-click', data),
-  getStats: (sellerId: string) => apiClient.get(`/sellers/${sellerId}/stats`),
 };
 
 export const couponsAPI = {
@@ -100,10 +88,10 @@ export const couponsAPI = {
 
 export const analyticsAPI = {
   getTestCampaigns: () => apiClient.get('/analytics/test-campaigns'),
-  createTestCampaign: (data: any) =>
+  createTestCampaign: (data: Payload) =>
     apiClient.post('/analytics/test-campaigns', data),
   evaluateTestCampaign: (id: string) =>
     apiClient.post(`/analytics/test-campaigns/${id}/evaluate`),
-  getProfitRecords: (params?: any) =>
+  getProfitRecords: (params?: Payload) =>
     apiClient.get('/analytics/profits', { params }),
 };

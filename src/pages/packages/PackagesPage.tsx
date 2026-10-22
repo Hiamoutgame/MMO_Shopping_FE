@@ -1,6 +1,11 @@
 import { useState, useEffect } from 'react';
+import { isAxiosError } from 'axios';
 import { packagesAPI, seasonsAPI } from '../../services/api';
 import type { Package, Season } from '../../types/chung-suc.types';
+
+function errorMessage(err: unknown, fallback: string): string {
+  return (isAxiosError<{ message?: string }>(err) && err.response?.data?.message) || fallback;
+}
 
 interface PackageCardProps {
   package: Package;
@@ -78,50 +83,58 @@ export function PackagesPage() {
   const [selectedSeason, setSelectedSeason] = useState<string>('all');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
-    loadSeasons();
+    let cancelled = false;
+    seasonsAPI
+      .getAll()
+      .then((response) => {
+        if (!cancelled) setSeasons(response.data.filter((s: Season) => s.status === 'ACTIVE'));
+      })
+      .catch((err: unknown) => console.error('Failed to load seasons:', err));
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
-    loadPackages();
-  }, [selectedSeason]);
+    let cancelled = false;
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const request =
+      selectedSeason === 'all' ? packagesAPI.getAll() : packagesAPI.getBySeason(selectedSeason);
 
-  const loadSeasons = async () => {
-    try {
-      const response = await seasonsAPI.getAll();
-      setSeasons(response.data.filter((s: Season) => s.status === 'ACTIVE'));
-    } catch (err: any) {
-      console.error('Failed to load seasons:', err);
-    }
+    request
+      .then((response) => {
+        if (cancelled) return;
+        setPackages(
+          response.data.filter((pkg: Package) => {
+            if (!pkg.isActive) return false;
+            if (!user.roleCode) return pkg.applicableRoles.includes('USER');
+            return pkg.applicableRoles.includes(user.roleCode);
+          }),
+        );
+        setError('');
+      })
+      .catch((err: unknown) => {
+        if (!cancelled) setError(errorMessage(err, 'Không thể tải danh sách gói'));
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedSeason, reloadKey]);
+
+  const selectSeason = (seasonId: string) => {
+    setLoading(true);
+    setSelectedSeason(seasonId);
   };
 
-  const loadPackages = async () => {
-    try {
-      setLoading(true);
-      setError('');
-
-      let response;
-      if (selectedSeason === 'all') {
-        response = await packagesAPI.getAll();
-      } else {
-        response = await packagesAPI.getBySeason(selectedSeason);
-      }
-
-      const filteredPackages = response.data.filter((pkg: Package) => {
-        if (!pkg.isActive) return false;
-        if (!user.roleCode) return pkg.applicableRoles.includes('USER');
-        return pkg.applicableRoles.includes(user.roleCode);
-      });
-
-      setPackages(filteredPackages);
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Không thể tải danh sách gói');
-    } finally {
-      setLoading(false);
-    }
+  const retry = () => {
+    setLoading(true);
+    setReloadKey((key) => key + 1);
   };
 
   const handleSelectPackage = (packageId: string) => {
@@ -141,7 +154,7 @@ export function PackagesPage() {
     return (
       <div className="error-container">
         <p className="error-message">{error}</p>
-        <button onClick={loadPackages}>Thử lại</button>
+        <button onClick={retry}>Thử lại</button>
       </div>
     );
   }
@@ -159,7 +172,7 @@ export function PackagesPage() {
         <div className="season-filter">
           <button
             className={`filter-chip ${selectedSeason === 'all' ? 'active' : ''}`}
-            onClick={() => setSelectedSeason('all')}
+            onClick={() => selectSeason('all')}
           >
             Tất cả
           </button>
@@ -167,7 +180,7 @@ export function PackagesPage() {
             <button
               key={season.id}
               className={`filter-chip ${selectedSeason === season.id ? 'active' : ''}`}
-              onClick={() => setSelectedSeason(season.id)}
+              onClick={() => selectSeason(season.id)}
             >
               {season.name}
             </button>

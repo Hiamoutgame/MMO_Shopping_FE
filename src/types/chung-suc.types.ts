@@ -23,7 +23,7 @@ export interface ChungSucCampaign {
   startTime: string;
   endTime: string;
   status: 'DRAFT' | 'UPCOMING' | 'ACTIVE' | 'PAUSED' | 'COMPLETED' | 'ENDED' | 'CLOSED';
-  rewards?: Record<string, any>;
+  rewards?: Record<string, unknown>;
   createdAt: string;
   updatedAt: string;
   season?: Season;
@@ -36,7 +36,7 @@ export interface ChungSucParticipant {
   accountId: string;
   quantity: number;
   joinedAt: string;
-  account?: any;
+  account?: { id: string; email: string; name: string };
 }
 
 export interface Product {
@@ -88,40 +88,11 @@ export interface PriceCalculationResult {
   floorEnforced: boolean;
 }
 
-export interface SellerProfile {
-  id: string;
-  accountId: string;
-  businessName: string;
-  businessType?: string;
-  taxId?: string;
-  businessAddress?: string;
-  phoneNumber?: string;
-  approvalStatus: 'PENDING' | 'APPROVED' | 'REJECTED';
-  approvedAt?: string;
-  approvedBy?: string;
-  rejectionReason?: string;
-  commissionRate: number;
-  totalSales: string;
-  totalCommission: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface SellerReferralCode {
-  id: string;
-  sellerId: string;
-  code: string;
-  isActive: boolean;
-  usageCount: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
 export interface User {
   id: string;
   email: string;
   fullName: string;
-  roleCode: 'USER' | 'SELLER' | 'ADMIN';
+  roleCode: 'USER' | 'ADMIN';
   role: {
     id: string;
     code: string;

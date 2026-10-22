@@ -80,7 +80,7 @@ export default function JoinChungSucPage() {
     if (!productId || !userId) return;
     let cancelled = false;
     chungSucApi
-      .calculatePrice({ productId, accountId: userId, quantity, seasonId })
+      .calculatePrice({ productId, quantity, seasonId })
       .then((result) => {
         if (!cancelled) setPrice(result);
       })

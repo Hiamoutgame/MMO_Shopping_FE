@@ -1,6 +1,11 @@
 import { useState, useEffect } from 'react';
+import { isAxiosError } from 'axios';
 import { seasonsAPI } from '../../services/api';
 import type { Season } from '../../types/chung-suc.types';
+
+function errorMessage(err: unknown, fallback: string): string {
+  return (isAxiosError<{ message?: string }>(err) && err.response?.data?.message) || fallback;
+}
 
 interface SeasonCardProps {
   season: Season;
@@ -105,22 +110,31 @@ export function SeasonsPage() {
   const [filter, setFilter] = useState<'all' | 'active' | 'upcoming'>('all');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
-    loadSeasons();
-  }, []);
+    let cancelled = false;
+    seasonsAPI
+      .getAll()
+      .then((response) => {
+        if (cancelled) return;
+        setSeasons(response.data);
+        setError('');
+      })
+      .catch((err: unknown) => {
+        if (!cancelled) setError(errorMessage(err, 'Không thể tải danh sách season'));
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [reloadKey]);
 
-  const loadSeasons = async () => {
-    try {
-      setLoading(true);
-      setError('');
-      const response = await seasonsAPI.getAll();
-      setSeasons(response.data);
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Không thể tải danh sách season');
-    } finally {
-      setLoading(false);
-    }
+  const retry = () => {
+    setLoading(true);
+    setReloadKey((key) => key + 1);
   };
 
   const handleViewCampaigns = (seasonId: string) => {
@@ -147,7 +161,7 @@ export function SeasonsPage() {
     return (
       <div className="error-container">
         <p className="error-message">{error}</p>
-        <button onClick={loadSeasons}>Thử lại</button>
+        <button onClick={retry}>Thử lại</button>
       </div>
     );
   }
