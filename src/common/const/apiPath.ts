@@ -37,6 +37,7 @@ export const API_PATHS = {
     PARTICIPANTS: (id: string) => `/campaigns/${id}/participants`,
     MY_REQUESTS: '/campaigns/requests/me',
     CANCEL_REQUEST: (requestId: string) => `/campaigns/requests/${requestId}/cancel`,
+    REQUEST_STATUS: (requestId: string) => `/campaigns/requests/${requestId}/status`,
     LIFECYCLE: (id: string, action: 'activate' | 'pause' | 'end' | 'close') =>
       `/campaigns/${id}/${action}`,
   },

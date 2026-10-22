@@ -66,6 +66,25 @@ export interface CampaignParticipantDto {
   currency: string;
   joinedAt: string;
   cancelledAt: string | null;
+  statusHistory: RequestStatusHistoryDto[];
+}
+
+export interface RequestStatusHistoryDto {
+  from: ParticipantStatus;
+  to: ParticipantStatus;
+  at: string;
+  // accountId của admin đã đổi.
+  by: string;
+  note?: string;
+}
+
+export interface AdminCampaignRequestDto extends CampaignParticipantDto {
+  account: { id: string; email: string; name: string } | null;
+}
+
+export interface UpdateRequestStatusRequest {
+  status: ParticipantStatus;
+  note?: string;
 }
 
 export interface MyRequestDto extends CampaignParticipantDto {

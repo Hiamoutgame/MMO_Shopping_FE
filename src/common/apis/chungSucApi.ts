@@ -1,6 +1,7 @@
 import { httpClient } from './httpClient';
 import { API_PATHS } from '../const/apiPath';
 import type {
+  AdminCampaignRequestDto,
   CalculatePriceRequest,
   CampaignDto,
   CampaignLifecycleAction,
@@ -11,6 +12,7 @@ import type {
   PriceCalculationDto,
   SeasonDto,
   UpdateCampaignRequest,
+  UpdateRequestStatusRequest,
 } from '../models/chungSuc';
 
 export const chungSucApi = {
@@ -58,6 +60,20 @@ export const adminChungSucApi = {
 
   runLifecycle(id: string, action: CampaignLifecycleAction): Promise<CampaignDto> {
     return httpClient.post<CampaignDto>(API_PATHS.CAMPAIGNS.LIFECYCLE(id, action));
+  },
+
+  requests(campaignId: string): Promise<AdminCampaignRequestDto[]> {
+    return httpClient.get<AdminCampaignRequestDto[]>(API_PATHS.CAMPAIGNS.PARTICIPANTS(campaignId));
+  },
+
+  updateRequestStatus(
+    requestId: string,
+    payload: UpdateRequestStatusRequest,
+  ): Promise<CampaignParticipantDto> {
+    return httpClient.patch<CampaignParticipantDto>(
+      API_PATHS.CAMPAIGNS.REQUEST_STATUS(requestId),
+      payload,
+    );
   },
 
   deleteCampaign(id: string): Promise<{ id: string }> {

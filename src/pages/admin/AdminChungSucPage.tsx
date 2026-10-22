@@ -31,6 +31,7 @@ import {
   AdminTextAreaField,
 } from '../../components/AdminForm/AdminForm';
 import { useAdminRequestState } from '../../hooks/useAdminRequestState';
+import { AdminChungSucRequestsModal } from './AdminChungSucRequestsModal';
 
 // Khớp với bảng chuyển trạng thái của BE (chung-suc.service.ts).
 const LIFECYCLE_ACTIONS: Array<{
@@ -141,6 +142,7 @@ export default function AdminChungSucPage() {
   const [saving, setSaving] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<CampaignDto | null>(null);
+  const [viewingRequests, setViewingRequests] = useState<CampaignDto | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
@@ -308,6 +310,13 @@ export default function AdminChungSucPage() {
                       )}
                       <button
                         type="button"
+                        onClick={() => setViewingRequests(campaign)}
+                        className="text-[12px] font-bold text-[#DCE4F8] hover:underline"
+                      >
+                        Yêu cầu
+                      </button>
+                      <button
+                        type="button"
                         onClick={() => openEdit(campaign)}
                         className="text-[12px] font-bold text-[#35FFB1] hover:underline"
                       >
@@ -431,6 +440,14 @@ export default function AdminChungSucPage() {
           />
         </div>
       </AdminModal>
+
+      {viewingRequests && (
+        <AdminChungSucRequestsModal
+          key={viewingRequests.id}
+          campaign={viewingRequests}
+          onClose={() => setViewingRequests(null)}
+        />
+      )}
 
       <ConfirmDialog
         open={deleting !== null}

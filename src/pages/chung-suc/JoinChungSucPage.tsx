@@ -5,27 +5,17 @@ import { useAuthStore } from '../../common/stores/useAuthStore';
 import type {
   CampaignDto,
   MyRequestDto,
-  ParticipantStatus,
   PriceCalculationDto,
 } from '../../common/models/chungSuc';
 import type { ApiError } from '../../common/models/common';
 import { APP_CONSTANTS } from '../../common/const/app';
 import { formatCurrency, formatDateTime } from '../../common/libs/formatter';
+import { REQUEST_STATUS_LABELS } from '../../common/libs/chungSucRequest';
 import { Button } from '../../components/Button/Button';
 import { Chip } from '../../components/Chip/Chip';
 import { PageContainer } from '../../components/PageContainer/PageContainer';
 import { QuantitySelector } from '../../components/QuantitySelector/QuantitySelector';
 import { SupportCodeInput } from '../../components/SupportCodeInput/SupportCodeInput';
-
-const REQUEST_STATUS_LABELS: Record<ParticipantStatus, string> = {
-  PENDING: 'Chờ xử lý',
-  CHECKING: 'Đang kiểm tra mã',
-  PROCESSING: 'Đang tiếp sức',
-  SUCCESS: 'Hoàn tất',
-  PARTIAL_SUCCESS: 'Hoàn tất một phần',
-  FAILED: 'Thất bại',
-  CANCELLED: 'Đã hủy',
-};
 
 export default function JoinChungSucPage() {
   const { campaignId } = useParams<{ campaignId: string }>();
