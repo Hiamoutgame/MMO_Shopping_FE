@@ -1,81 +1,173 @@
-# MMO Shopping — Frontend
+# MMO Shopping - Frontend
 
-Frontend React cho dự án **MMO Shopping** ("Chợ Tài Khoản AI"), kết nối API backend NestJS (`/api/v1`).
+React + TypeScript frontend cho hệ thống CHUNG SỨC.
 
-## Stack
+> **Role hỗ trợ: `USER` (khách) và `ADMIN` (chủ shop).** Role seller đã ngừng từ 23/10/2026; trang/API seller đã gỡ khỏi frontend. Xem `docs/changes/seller-role-disabled-2026-10-23.md` trong repo backend.
 
-| Nhóm | Công nghệ |
-| :--- | :--- |
-| UI runtime | React 19, React DOM 19 |
-| Build | Vite, TypeScript |
-| Routing | React Router DOM 7 |
-| Styling | Tailwind CSS 4, `clsx`, `tailwind-merge` |
-| Client state | Zustand 5 |
-| HTTP | Axios (một client duy nhất `common/apis/httpClient.ts`) |
-| Validation | Zod |
+## 🚀 Quick Start
 
-## Chạy dự án
-
+### 1. Cài đặt dependencies
 ```bash
-# Cài dependency
-pnpm install
-
-# Dev server
-pnpm dev
-
-# Build production
-pnpm build
-
-# Preview bản build
-pnpm preview
-
-# Lint
-pnpm lint
+npm install
 ```
 
-## Biến môi trường
+### 2. Cấu hình environment
+File `.env` đã được tạo với cấu hình mặc định:
+```
+VITE_API_URL=http://localhost:4000/api
+```
 
-Copy `.env.example` thành `.env` rồi điều chỉnh:
+### 3. Chạy development server
+```bash
+npm run dev
+```
 
-| Biến | Mô tả | Mặc định local |
-| :--- | :--- | :--- |
-| `VITE_API_BASE_URL` | Base path API frontend gọi | `/api/v1` |
-| `VITE_API_PROXY_TARGET` | Target proxy Vite dev | `http://127.0.0.1:3000` |
-| `VITE_ENABLE_SUPPORT_CODE` | Bật/tắt feature support-code (hiện `BLOCKED`) | `false` |
-| `VITE_ENABLE_CASHBACK` | Hiển thị Trung tâm Hoàn phí và tab điều hướng | `true` |
+Frontend sẽ chạy tại: http://localhost:3000
 
-Vite proxy `/api` → `VITE_API_PROXY_TARGET` để dev tránh CORS (backend chưa bật `enableCors`).
+## 📁 Cấu trúc dự án
 
-API Hoàn Phí 247 được gọi qua backend façade `/api/v1/cashback`; không đặt URL hoặc token nhà cung cấp trong biến `VITE_*`. Backend cấu hình `HOANPHI_API_BASE_URL`, timeout và khóa mã hóa integration riêng.
+```
+src/
+├── pages/
+│   ├── auth/
+│   │   ├── LoginPage.tsx          # Đăng nhập
+│   │   └── RegisterPage.tsx       # Đăng ký
+│   ├── chung-suc/
+│   │   ├── ChungSucCampaignsPage.tsx  # Danh sách chiến dịch
+│   │   └── JoinChungSucPage.tsx       # Tham gia chiến dịch
+│   ├── packages/
+│   │   └── PackagesPage.tsx       # Danh sách gói
+│   ├── seasons/
+│   │   └── SeasonsPage.tsx        # Danh sách seasons
+│   └── admin/
+│       └── AdminChungSucPages.tsx   # Quản lý admin
+├── services/
+│   └── api.ts                     # API client
+├── types/
+│   └── chung-suc.types.ts        # TypeScript types
+├── styles/
+│   ├── chung-suc.css             # Main styles
+│   └── auth.css                  # Auth styles
+├── App.tsx                        # Routing
+└── main.tsx                       # Entry point
+```
 
-## Quality gate
+## 🎨 Features
 
-Bắt buộc trước khi kết thúc công việc:
+### Trang công khai
+- ✅ Đăng nhập / Đăng ký
+- ✅ Danh sách chiến dịch CHUNG SỨC
+- ✅ Tham gia chiến dịch với tính giá real-time
+- ✅ Danh sách gói theo role
+- ✅ Danh sách seasons
 
-- `pnpm lint`
-- `pnpm build`
+### Admin Panel
+- ✅ Quản lý seasons (CRUD + lifecycle)
+- ✅ Quản lý chiến dịch CHUNG SỨC
+- ✅ Xem progress real-time
 
-Project chưa có test runner/script test — đừng mô tả test như năng lực đã có.
+## 🔐 Tài khoản demo
 
-## Tài liệu & rule bắt buộc đọc
+```
+USER:   user@mmo.vn / password123
+ADMIN:  admin@mmo.vn / password123
+```
 
-Trước khi sửa code, đọc:
+## 🛠️ Scripts
 
-- `docs/rules/structure.md` — cấu trúc thư mục & trách nhiệm từng layer.
-- `docs/rules/design.md` — design system + section **Admin UI**.
-- `docs/rules/reuse.md` — layout/component tái sử dụng + shared admin components.
-- `docs/structure/FE.md` (trong repo gốc `MMO_Shopping/docs/structure/FE.md`) — kiến trúc tổng thể.
+```bash
+# Development
+npm run dev
 
-## Local skill
+# Build production
+npm run build
 
-Project có local skill **`design-taste-frontend`** tại `.codex/skills/design-taste-frontend/` (nguồn `https://github.com/Leonxlnx/taste-skill`, biến thể v2 `design-taste-frontend`).
+# Preview production build
+npm run preview
+```
 
-- Dùng làm guideline UI chống "AI-slop" (layout, typography, spacing, motion).
-- Skill này hướng đến landing/portfolio nên áp dụng **có chọn lọc**: với admin, ưu tiên operational dashboard (dense, scan nhanh) theo `docs/rules/design.md` mục 7, không dùng hero marketing.
+## 🎯 Routing
 
-## Kiến trúc admin v1
+```
+/                          → Danh sách chiến dịch (protected)
+/login                     → Đăng nhập
+/register                  → Đăng ký
+/chung-suc                 → Danh sách chiến dịch
+/chung-suc/:id/join        → Tham gia chiến dịch
+/packages                  → Danh sách gói
+/seasons                   → Danh sách seasons
+/admin/seasons             → Quản lý seasons (ADMIN only)
+/admin/campaigns           → Quản lý campaigns (ADMIN only)
+```
 
-- Route `/admin/*` bọc `RequireAdmin` (chặn guest + user thường) + `AdminLayout`.
-- `common/apis/adminApi.ts` gọi `/api/v1/admin/*`; DTO/mapper ở `common/models` + `common/mapping`.
-- `common/apis/cashbackApi.ts` gọi `/api/v1/cashback/*`; token Hoàn Phí 247 luôn được giữ và mã hóa ở backend.
-- Pages admin ở `pages/admin/*`; shared admin UI (table, status badge, filter bar, form modal, confirm dialog, pagination) ở `components`.
+## 🔒 Authentication
+
+- JWT token được lưu trong localStorage
+- Axios interceptor tự động thêm Authorization header
+- Auto redirect về /login khi token hết hạn (401)
+- Role-based routing với ProtectedRoute component
+
+## 💰 Price Calculation Flow
+
+1. User nhập số lượng, mã coupon (account lấy từ phiên đăng nhập ở backend)
+2. Frontend gọi `POST /api/pricing/calculate` với tất cả params
+3. Backend tính giá qua price engine (KHÔNG tin frontend)
+4. Response trả về breakdown chi tiết từng bước giảm giá
+5. Frontend hiển thị breakdown + final price
+
+**QUAN TRỌNG:** Final price LUÔN được server tính toán, frontend KHÔNG BAO GIỜ tính giá.
+
+## 🎨 Design System
+
+- **Base colors:** #05070C → #161D2B (dark surfaces)
+- **Accent:** #38BDF8 (cyan), #6EE7B7 (emerald)
+- **Typography:** fluid clamp() sizing
+- **Layout:** CSS Grid primary, Flexbox secondary
+- **Radius:** 16px cards, 999px pills
+- **Responsive:** mobile-first approach
+
+## 📦 Tech Stack
+
+- **React 18** - UI library
+- **TypeScript** - Type safety
+- **React Router 6** - Routing
+- **Axios** - HTTP client
+- **Vite** - Build tool
+- **CSS** - Vanilla CSS (no preprocessor)
+
+## 🔗 API Integration
+
+Backend API: http://localhost:4000/api
+
+Tất cả API calls đều qua `src/services/api.ts` với:
+- Request interceptor: thêm Authorization header
+- Response interceptor: handle 401 errors
+- Typed responses với TypeScript interfaces
+
+## 📝 Next Steps
+
+1. Run backend: `cd ../MMO_Shopping_BE && npm run start:dev`
+2. Run migration: `npm run typeorm:migration:run`
+3. Seed data: `npm run seed:chung-suc`
+4. Install frontend deps: `npm install`
+5. Start frontend: `npm run dev`
+6. Open: http://localhost:3000
+7. Login với tài khoản demo
+
+## 🐛 Troubleshooting
+
+**CORS errors:**
+- Backend phải enable CORS cho http://localhost:3000
+- Check main.ts: `app.enableCors({ origin: 'http://localhost:3000' })`
+
+**401 Unauthorized:**
+- Token hết hạn, đăng nhập lại
+- Check localStorage có accessToken không
+
+**API not found:**
+- Backend phải chạy trên port 4000
+- Check VITE_API_URL trong .env
+
+**Build errors:**
+- Run `npm install` lại
+- Delete node_modules và package-lock.json, cài lại

@@ -19,6 +19,7 @@ const ADMIN_NAV: AdminNavItem[] = [
   { label: 'Kho hàng', path: '/admin/inventory' },
   { label: 'Đơn hàng', path: '/admin/orders' },
   { label: 'Voucher', path: '/admin/vouchers' },
+  { label: 'Chung sức', path: '/admin/chung-suc' },
   { label: 'Tài chính', path: '/admin/finance' },
   { label: 'Audit logs', path: '/admin/audit-logs' },
 ];

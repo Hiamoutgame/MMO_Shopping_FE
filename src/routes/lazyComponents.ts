@@ -4,7 +4,7 @@ export const HomePage = lazy(() => import('../pages/HomePage'));
 export const ProductsPage = lazy(() => import('../pages/ProductsPage'));
 export const ProductDetailPage = lazy(() => import('../pages/ProductDetailPage'));
 export const CartPage = lazy(() => import('../pages/CartPage'));
-export const SupportPage = lazy(() => import('../pages/SupportPage'));
+export const WalletPage = lazy(() => import('../pages/wallet/WalletPage'));
 export const PolicyPage = lazy(() => import('../pages/PolicyPage'));
 export const ContactPage = lazy(() => import('../pages/ContactPage'));
 export const LoginPage = lazy(() => import('../pages/LoginPage'));
@@ -16,6 +16,8 @@ export const CashbackWalletPage = lazy(() => import('../pages/cashback/CashbackW
 export const CashbackOrdersPage = lazy(() => import('../pages/cashback/CashbackOrdersPage'));
 export const CashbackWithdrawalsPage = lazy(() => import('../pages/cashback/CashbackWithdrawalsPage'));
 export const CashbackReferralsPage = lazy(() => import('../pages/cashback/CashbackReferralsPage'));
+export const ChungSucCampaignsPage = lazy(() => import('../pages/chung-suc/ChungSucCampaignsPage'));
+export const JoinChungSucPage = lazy(() => import('../pages/chung-suc/JoinChungSucPage'));
 
 // Admin pages
 export const AdminDashboardPage = lazy(() => import('../pages/admin/AdminDashboardPage'));
@@ -26,3 +28,4 @@ export const AdminOrdersPage = lazy(() => import('../pages/admin/AdminOrdersPage
 export const AdminVouchersPage = lazy(() => import('../pages/admin/AdminVouchersPage'));
 export const AdminFinancePage = lazy(() => import('../pages/admin/AdminFinancePage'));
 export const AdminAuditLogsPage = lazy(() => import('../pages/admin/AdminAuditLogsPage'));
+export const AdminChungSucPage = lazy(() => import('../pages/admin/AdminChungSucPage'));

@@ -28,6 +28,32 @@ export const API_PATHS = {
   CHECKOUT: {
     CREATE: '/checkout',
   },
+  CAMPAIGNS: {
+    LIST: '/campaigns',
+    ACTIVE: '/campaigns/active',
+    DETAIL: (id: string) => `/campaigns/${id}`,
+    JOIN: (id: string) => `/campaigns/${id}/join`,
+    PROGRESS: (id: string) => `/campaigns/${id}/progress`,
+    PARTICIPANTS: (id: string) => `/campaigns/${id}/participants`,
+    MY_REQUESTS: '/campaigns/requests/me',
+    CANCEL_REQUEST: (requestId: string) => `/campaigns/requests/${requestId}/cancel`,
+    REQUEST_STATUS: (requestId: string) => `/campaigns/requests/${requestId}/status`,
+    LIFECYCLE: (id: string, action: 'activate' | 'pause' | 'end' | 'close') =>
+      `/campaigns/${id}/${action}`,
+  },
+  WALLET: {
+    GET: '/wallet',
+    TRANSACTIONS: '/wallet-transactions',
+    DEPOSITS: '/deposits',
+    DEPOSIT_CONFIG: '/deposits/config',
+    DEPOSIT_DETAIL: (id: string) => `/deposits/${id}`,
+  },
+  SEASONS: {
+    LIST: '/seasons',
+  },
+  PRICING: {
+    CALCULATE: '/pricing/calculate',
+  },
   CASHBACK: {
     CONFIG: '/cashback/config',
     CONNECTION: '/cashback/connection',
@@ -72,5 +98,10 @@ export const API_PATHS = {
     PAYMENT_TRANSACTIONS: '/admin/payment-transactions',
     PAYMENT_TRANSACTION_DETAIL: (id: string) => `/admin/payment-transactions/${id}`,
     WALLET_LEDGERS: '/admin/wallet-ledgers',
+    PAYMENT_EVENTS: '/admin/payment-webhook-events',
+    PAYMENT_EVENT_DETAIL: (id: string) => `/admin/payment-webhook-events/${id}`,
+    PAYMENT_EVENT_RESOLVE: (id: string) => `/admin/payment-webhook-events/${id}/resolve`,
+    SEPAY_SYNC: '/admin/payments/sepay/sync',
+    WALLET_RECONCILIATION: '/admin/wallets/reconciliation',
   },
 } as const;

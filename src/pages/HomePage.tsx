@@ -56,7 +56,7 @@ export default function HomePage() {
                 Khám phá sản phẩm
               </button>
             </Link>
-            <Link to={APP_CONSTANTS.ROUTES.SUPPORT}>
+            <Link to={APP_CONSTANTS.ROUTES.CHUNG_SUC}>
               <button
                 type="button"
                 className="h-[52px] px-[20px] rounded-[26px] bg-[#090B12] border border-[#FFFFFF2B] text-[#DCE4F8] font-sans text-[15px] font-bold hover:bg-white/5 transition-all cursor-pointer"
@@ -355,7 +355,7 @@ export default function HomePage() {
                 Xem sản phẩm
               </button>
             </Link>
-            <Link to={APP_CONSTANTS.ROUTES.SUPPORT} className="w-full sm:w-auto">
+            <Link to={APP_CONSTANTS.ROUTES.CHUNG_SUC} className="w-full sm:w-auto">
               <button
                 type="button"
                 className="w-full sm:w-[190px] h-[48px] rounded-[15px] bg-[#07080D99] border border-[#7887BE33] text-[#DCE4F8] font-sans text-[14px] font-semibold hover:bg-white/5 transition-all cursor-pointer"

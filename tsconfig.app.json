@@ -22,5 +22,7 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"]
+  "include": ["src"],
+  // Trang seller cũ gọi các hàm sellersAPI chưa tồn tại và chưa được route; bỏ khỏi build cho tới đợt sync sellers.
+  "exclude": ["src/pages/seller"]
 }

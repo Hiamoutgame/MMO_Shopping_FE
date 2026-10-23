@@ -15,12 +15,22 @@ import { AdminModal } from '../../components/AdminModal/AdminModal';
 import { AdminDetailGrid, AdminField, AdminSelectField } from '../../components/AdminForm/AdminForm';
 import { Button } from '../../components/Button/Button';
 import { useAdminRequestState } from '../../hooks/useAdminRequestState';
+import { AdminPaymentEventsPanel } from './AdminPaymentEventsPanel';
+import { AdminReconciliationPanel } from './AdminReconciliationPanel';
+
+type FinanceTab = 'payments' | 'ledgers' | 'events' | 'reconcile';
+const TAB_LABELS: Record<FinanceTab, string> = {
+  payments: 'Payments',
+  ledgers: 'Wallet ledgers',
+  events: 'Giao dịch ngân hàng',
+  reconcile: 'Đối soát',
+};
 
 const PAGE_SIZE = 20;
 const PAYMENT_STATUSES: PaymentTransactionStatus[] = ['PENDING', 'SUCCEEDED', 'FAILED', 'CANCELLED'];
 
 export default function AdminFinancePage() {
-  const [tab, setTab] = useState<'payments' | 'ledgers'>('payments');
+  const [tab, setTab] = useState<FinanceTab>('payments');
   const [payments, setPayments] = useState<AdminPaymentTransactionDto[]>([]);
   const [ledgers, setLedgers] = useState<AdminWalletLedgerDto[]>([]);
   const [totalPages, setTotalPages] = useState(0);
@@ -33,6 +43,7 @@ export default function AdminFinancePage() {
   const [selectedPayment, setSelectedPayment] = useState<AdminPaymentTransactionDto | null>(null);
 
   useEffect(() => {
+    if (tab !== 'payments' && tab !== 'ledgers') return;
     let cancelled = false;
     const commonQuery = {
       page,
@@ -63,7 +74,7 @@ export default function AdminFinancePage() {
     };
   }, [appliedAccountFilter, page, reloadKey, setError, setLoading, statusFilter, tab]);
 
-  const switchTab = (next: 'payments' | 'ledgers') => {
+  const switchTab = (next: FinanceTab) => {
     if (next === tab) return;
     beginRequest();
     setTab(next);
@@ -99,11 +110,11 @@ export default function AdminFinancePage() {
         <div>
           <h1 className="text-[20px] font-extrabold text-white">Finance</h1>
           <p className="mt-1 text-[13px] text-[#94A3B8]">
-            Payment transactions detail and wallet ledger list APIs.
+            Nạp tiền SePay, ledger ví, giao dịch ngân hàng cần xử lý và đối soát số dư.
           </p>
         </div>
         <div className="flex gap-1 rounded-[10px] border border-white/10 bg-[#0B1020] p-1">
-          {(['payments', 'ledgers'] as const).map((key) => (
+          {(Object.keys(TAB_LABELS) as FinanceTab[]).map((key) => (
             <button
               key={key}
               type="button"
@@ -114,12 +125,17 @@ export default function AdminFinancePage() {
                   : 'rounded-[8px] px-3 py-1.5 text-[12px] font-medium text-[#94A3B8]'
               }
             >
-              {key === 'payments' ? 'Payments' : 'Wallet ledgers'}
+              {TAB_LABELS[key]}
             </button>
           ))}
         </div>
       </header>
 
+      {tab === 'events' && <AdminPaymentEventsPanel />}
+      {tab === 'reconcile' && <AdminReconciliationPanel />}
+
+      {(tab === 'payments' || tab === 'ledgers') && (
+        <>
       <section className="grid grid-cols-1 gap-3 rounded-xl border border-white/10 bg-[#0B1020] p-4 md:grid-cols-3">
         <AdminField
           label="Account ID"
@@ -242,6 +258,9 @@ export default function AdminFinancePage() {
       )}
 
       <Pagination page={page} totalPages={totalPages} onChange={changePage} />
+
+        </>
+      )}
 
       <AdminModal open={selectedPayment !== null} title="Payment transaction detail" onClose={() => setSelectedPayment(null)}>
         {selectedPayment && (

@@ -9,7 +9,6 @@ export * from './CartLineItem/CartLineItem';
 export * from './OrderSummary/OrderSummary';
 export * from './SupportCodeInput/SupportCodeInput';
 export * from './QuantitySelector/QuantitySelector';
-export * from './SupportProgress/SupportProgress';
 export * from './Header/Header';
 export * from './Footer/Footer';
 export * from './Input/Input';
